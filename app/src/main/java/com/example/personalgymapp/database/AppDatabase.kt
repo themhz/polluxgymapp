@@ -1,0 +1,30 @@
+package com.example.personalgymapp.database
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.example.personalgymapp.database.dao.ClientDao
+import com.example.personalgymapp.database.entity.ClientEntity
+
+@Database(entities = [ClientEntity::class], version = 1, exportSchema = false)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun clientDao(): ClientDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "personal_trainer_database"
+                ).build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}
