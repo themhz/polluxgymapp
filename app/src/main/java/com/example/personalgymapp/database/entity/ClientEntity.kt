@@ -9,7 +9,7 @@ data class ClientEntity(
     val id: Int = 0,
     val name: String,
     val goal: String,
-    val age: Int,
+    val birthDate: String,
     val phone: String,
     val email: String,
     val sessionsCompleted: Int,

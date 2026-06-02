@@ -5,8 +5,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -16,6 +18,7 @@ import com.example.personalgymapp.model.WorkoutPlan
 @Composable
 fun WorkoutPlanDetailsScreen(
     workoutPlan: WorkoutPlan?,
+    onExerciseClick: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
     Scaffold(
@@ -82,22 +85,37 @@ fun WorkoutPlanDetailsScreen(
                 items(workoutPlan.exercises) { exercise ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
+                        onClick = { onExerciseClick(exercise.exerciseId) },
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = MaterialTheme.colorScheme.surface
                         )
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = exercise.exerciseName,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FitnessCenter,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
                             )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(text = "${exercise.sets} Sets x ${exercise.reps} Reps")
-                                Text(text = "Rest: ${exercise.restSeconds}s")
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = exercise.exerciseName,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(text = "${exercise.sets} Sets x ${exercise.reps} Reps")
+                                    Text(text = "Rest: ${exercise.restSeconds}s")
+                                }
                             }
                         }
                     }

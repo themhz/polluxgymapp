@@ -18,6 +18,7 @@ import com.example.personalgymapp.model.WorkoutPlan
 fun TrainingSessionDetailsScreen(
     trainingSession: TrainingSession?,
     workoutPlan: WorkoutPlan?,
+    onWorkoutPlanClick: (Int) -> Unit,
     onViewSessionResultsClick: (Int) -> Unit,
     onStartWorkoutClick: (Int) -> Unit,
     onBackClick: () -> Unit
@@ -77,8 +78,9 @@ fun TrainingSessionDetailsScreen(
                 if (workoutPlan != null) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
+                        onClick = { onWorkoutPlanClick(workoutPlan.id) },
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = MaterialTheme.colorScheme.surface
                         )
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -96,6 +98,17 @@ fun TrainingSessionDetailsScreen(
                                     text = workoutPlan.notes,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+                            
+                            workoutPlan.exercises.forEach { exercise ->
+                                val typeInfo = if (exercise.exerciseType == "TIME") "${exercise.targetDurationSeconds}s" else "${exercise.reps} reps"
+                                Text(
+                                    text = "• ${exercise.exerciseName}: ${exercise.sets}x $typeInfo",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }

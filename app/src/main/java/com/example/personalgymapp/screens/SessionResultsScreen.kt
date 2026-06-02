@@ -5,13 +5,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.components.AddActionFab
 import com.example.personalgymapp.model.SessionExerciseResult
 import com.example.personalgymapp.model.TrainingSession
 import com.example.personalgymapp.model.WorkoutPlan
@@ -43,12 +43,9 @@ fun SessionResultsScreen(
         },
         floatingActionButton = {
             if (trainingSession != null) {
-                ExtendedFloatingActionButton(
-                    onClick = { onAddExerciseResultClick(trainingSession.id) },
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                    icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                    text = { Text("Add Exercise Result") }
+                AddActionFab(
+                    label = "Add Exercise Result",
+                    onClick = { onAddExerciseResultClick(trainingSession.id) }
                 )
             }
         },
@@ -76,7 +73,7 @@ fun SessionResultsScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = MaterialTheme.colorScheme.surface
                         )
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -215,6 +212,7 @@ fun ExerciseResultCard(result: SessionExerciseResult) {
                         set.reps?.let { Text(text = "$it reps", style = MaterialTheme.typography.bodySmall) }
                         set.weightKg?.let { Text(text = "$it kg", style = MaterialTheme.typography.bodySmall) }
                         set.durationSeconds?.let { Text(text = "$it s", style = MaterialTheme.typography.bodySmall) }
+                        set.restSecondsDone?.let { Text(text = "Rest: ${it}s", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary) }
                     }
                 }
                 if (set.notes.isNotBlank()) {

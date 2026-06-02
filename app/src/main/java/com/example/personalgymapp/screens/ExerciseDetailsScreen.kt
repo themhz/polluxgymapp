@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -16,6 +17,7 @@ import com.example.personalgymapp.model.Exercise
 @Composable
 fun ExerciseDetailsScreen(
     exercise: Exercise?,
+    onEditClick: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
     Scaffold(
@@ -25,6 +27,13 @@ fun ExerciseDetailsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (exercise != null) {
+                        IconButton(onClick = { onEditClick(exercise.id) }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

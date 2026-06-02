@@ -11,9 +11,9 @@ val mockSessionExerciseResults = listOf(
         exerciseId = 1,
         exerciseName = "Bench Press",
         sets = listOf(
-            SessionSetResult(1, 10, 50.0, null, ""),
-            SessionSetResult(2, 9, 50.0, null, ""),
-            SessionSetResult(3, 8, 47.5, null, "Lowered weight for last set")
+            SessionSetResult(1, 10, 50.0, null, 60, ""),
+            SessionSetResult(2, 9, 50.0, null, 60, ""),
+            SessionSetResult(3, 8, 47.5, null, 0, "Lowered weight for last set")
         ),
         notes = "Good form throughout"
     ),
@@ -23,9 +23,9 @@ val mockSessionExerciseResults = listOf(
         exerciseId = 5,
         exerciseName = "Squats",
         sets = listOf(
-            SessionSetResult(1, 12, 60.0, null, ""),
-            SessionSetResult(2, 12, 60.0, null, ""),
-            SessionSetResult(3, 10, 60.0, null, "")
+            SessionSetResult(1, 12, 60.0, null, 90, ""),
+            SessionSetResult(2, 12, 60.0, null, 90, ""),
+            SessionSetResult(3, 10, 60.0, null, 0, "")
         ),
         notes = ""
     ),
@@ -36,9 +36,9 @@ val mockSessionExerciseResults = listOf(
         exerciseId = 2,
         exerciseName = "Push-ups",
         sets = listOf(
-            SessionSetResult(1, 15, null, null, ""),
-            SessionSetResult(2, 12, null, null, ""),
-            SessionSetResult(3, 10, null, null, "")
+            SessionSetResult(1, 15, null, null, 30, ""),
+            SessionSetResult(2, 12, null, null, 30, ""),
+            SessionSetResult(3, 10, null, null, 0, "")
         ),
         notes = "Bodyweight only"
     ),
@@ -48,9 +48,9 @@ val mockSessionExerciseResults = listOf(
         exerciseId = 11,
         exerciseName = "Plank",
         sets = listOf(
-            SessionSetResult(1, null, null, 60, ""),
-            SessionSetResult(2, null, null, 45, ""),
-            SessionSetResult(3, null, null, 30, "")
+            SessionSetResult(1, null, null, 60, 45, ""),
+            SessionSetResult(2, null, null, 45, 45, ""),
+            SessionSetResult(3, null, null, 30, 0, "")
         ),
         notes = "Focus on core stability"
     )

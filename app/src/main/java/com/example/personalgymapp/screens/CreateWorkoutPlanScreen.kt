@@ -129,7 +129,7 @@ fun CreateWorkoutPlanScreen(
             selectedExercises.forEachIndexed { index, workoutExercise ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Row(

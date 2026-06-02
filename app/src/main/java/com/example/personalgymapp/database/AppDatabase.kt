@@ -5,11 +5,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.personalgymapp.database.dao.ClientDao
+import com.example.personalgymapp.database.dao.SubscriptionDao
 import com.example.personalgymapp.database.entity.ClientEntity
+import com.example.personalgymapp.database.entity.SubscriptionEntity
 
-@Database(entities = [ClientEntity::class], version = 1, exportSchema = false)
+@Database(entities = [ClientEntity::class, SubscriptionEntity::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun clientDao(): ClientDao
+    abstract fun subscriptionDao(): SubscriptionDao
 
     companion object {
         @Volatile
@@ -21,7 +24,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "personal_trainer_database"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }

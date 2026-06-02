@@ -30,5 +30,15 @@ val mockWorkoutPlans = listOf(
             WorkoutExercise(9, "Bicep Curls", 3, 10, 60, "REPS", null),
             WorkoutExercise(10, "Tricep Dips", 3, 12, 60, "REPS", null)
         )
+    ),
+    WorkoutPlan(
+        id = 3,
+        name = "High Intensity Cardio",
+        clientId = 6,
+        clientName = "Themis",
+        notes = "Focus on steady jumping rhythm.",
+        exercises = listOf(
+            WorkoutExercise(14, "Jumping Rope", 3, 0, 60, "TIME", 180)
+        )
     )
 )

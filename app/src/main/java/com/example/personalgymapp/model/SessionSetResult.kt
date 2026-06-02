@@ -5,5 +5,6 @@ data class SessionSetResult(
     val reps: Int?,
     val weightKg: Double?,
     val durationSeconds: Int?,
+    val restSecondsDone: Int? = null,
     val notes: String
 )

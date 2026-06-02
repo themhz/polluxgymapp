@@ -1,11 +1,16 @@
 package com.example.personalgymapp.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Sensors
+import androidx.compose.material.icons.filled.Subscriptions
+import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.components.AppLogo
 
 @Composable
 fun HomeScreen(
@@ -20,7 +26,9 @@ fun HomeScreen(
     onWorkoutsClick: () -> Unit,
     onProgressClick: () -> Unit,
     onCalendarClick: () -> Unit,
-    onSensorsClick: () -> Unit
+    onSensorsClick: () -> Unit,
+    onGarminClick: () -> Unit,
+    onSubscriptionsClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -35,21 +43,27 @@ fun HomeScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            AppLogo(size = 120.dp)
+            
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
-                text = "Welcome Back",
+                text = "Power Cat Dashboard",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Manage clients, workouts, and progress",
+                text = "Manage clients, workout plans, and progress",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.tertiary
             )
@@ -66,13 +80,13 @@ fun HomeScreen(
                 ) {
                     MenuCard(
                         title = "Clients",
-                        icon = Icons.Default.AccountBox,
+                        icon = Icons.Default.Person,
                         modifier = Modifier.weight(1f),
                         onClick = onClientsClick
                     )
                     MenuCard(
-                        title = "Workouts",
-                        icon = Icons.Default.PlayArrow,
+                        title = "Workout Plans",
+                        icon = Icons.AutoMirrored.Filled.Assignment,
                         modifier = Modifier.weight(1f),
                         onClick = onWorkoutsClick
                     )
@@ -83,30 +97,47 @@ fun HomeScreen(
                 ) {
                     MenuCard(
                         title = "Progress",
-                        icon = Icons.Default.Info,
+                        icon = Icons.AutoMirrored.Filled.TrendingUp,
                         modifier = Modifier.weight(1f),
                         onClick = onProgressClick
                     )
                     MenuCard(
-                        title = "Calendar",
-                        icon = Icons.Default.DateRange,
+                        title = "Training Sessions",
+                        icon = Icons.Default.CalendarMonth,
                         modifier = Modifier.weight(1f),
                         onClick = onCalendarClick
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = onSensorsClick,
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    )
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Icon(Icons.Default.Info, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("View Device Sensors")
+                    MenuCard(
+                        title = "Sensors",
+                        icon = Icons.Default.Sensors,
+                        modifier = Modifier.weight(1f),
+                        onClick = onSensorsClick
+                    )
+                    MenuCard(
+                        title = "Garmin",
+                        icon = Icons.Default.Watch,
+                        modifier = Modifier.weight(1f),
+                        onClick = onGarminClick
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    MenuCard(
+                        title = "Subscriptions",
+                        icon = Icons.Default.Subscriptions,
+                        modifier = Modifier.weight(1f),
+                        onClick = onSubscriptionsClick
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -160,7 +191,9 @@ fun HomeScreenPreview() {
             onWorkoutsClick = {},
             onProgressClick = {},
             onCalendarClick = {},
-            onSensorsClick = {}
+            onSensorsClick = {},
+            onGarminClick = {},
+            onSubscriptionsClick = {}
         )
     }
 }

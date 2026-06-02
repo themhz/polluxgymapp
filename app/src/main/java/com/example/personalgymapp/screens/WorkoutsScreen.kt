@@ -1,42 +1,63 @@
 package com.example.personalgymapp.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.AccessibilityNew
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.SportsHandball
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.components.AddActionFab
 import com.example.personalgymapp.model.Exercise
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutsScreen(
     exercises: List<Exercise>,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    selectedMuscleGroups: Set<String>,
+    onMuscleGroupsChange: (Set<String>) -> Unit,
     onExerciseClick: (Int) -> Unit,
     onAddExerciseClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    val muscleGroups = listOf("All", "Chest", "Back", "Legs", "Shoulders", "Arms", "Core")
-    var selectedMuscleGroup by remember { mutableStateOf("All") }
+    val allMuscleGroups = listOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio")
 
     val filteredExercises = exercises.filter {
         val matchesSearch = it.name.contains(searchQuery, ignoreCase = true)
-        val matchesMuscleGroup = selectedMuscleGroup == "All" || it.muscleGroup == selectedMuscleGroup
+        val matchesMuscleGroup = selectedMuscleGroups.isEmpty() || it.muscleGroup in selectedMuscleGroups
         matchesSearch && matchesMuscleGroup
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Exercise Library") },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.FitnessCenter,
+                            contentDescription = null
+                        )
+                        Text("Exercise Library")
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -50,13 +71,10 @@ fun WorkoutsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddExerciseClick,
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Exercise")
-            }
+            AddActionFab(
+                label = "Add Exercise",
+                onClick = onAddExerciseClick
+            )
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
@@ -76,7 +94,7 @@ fun WorkoutsScreen(
 
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = onSearchQueryChange,
                 label = { Text("Search exercises") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
@@ -84,20 +102,94 @@ fun WorkoutsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(muscleGroups) { group ->
-                    FilterChip(
-                        selected = selectedMuscleGroup == group,
-                        onClick = { selectedMuscleGroup = group },
-                        label = { Text(group) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.secondary,
-                            selectedLabelColor = MaterialTheme.colorScheme.onSecondary
-                        )
+            // Multi-select Dropdown for Muscle Groups
+            var expandedFilters by remember { mutableStateOf(false) }
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = if (selectedMuscleGroups.isEmpty()) "All Muscle Groups" else selectedMuscleGroups.joinToString(", "),
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Filter by Muscle Group") },
+                    trailingIcon = {
+                        IconButton(onClick = { expandedFilters = !expandedFilters }) {
+                            Icon(
+                                imageVector = if (expandedFilters) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                        unfocusedBorderColor = if (selectedMuscleGroups.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
+                )
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable { expandedFilters = !expandedFilters }
+                )
+
+                DropdownMenu(
+                    expanded = expandedFilters,
+                    onDismissRequest = { expandedFilters = false },
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                ) {
+                    allMuscleGroups.forEach { group ->
+                        val isSelected = selectedMuscleGroups.contains(group)
+                        DropdownMenuItem(
+                            text = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Checkbox(
+                                        checked = isSelected,
+                                        onCheckedChange = null
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(group)
+                                }
+                            },
+                            onClick = {
+                                val current = selectedMuscleGroups.toMutableSet()
+                                if (isSelected) current.remove(group) else current.add(group)
+                                onMuscleGroupsChange(current)
+                            }
+                        )
+                    }
+                    if (selectedMuscleGroups.isNotEmpty()) {
+                        HorizontalDivider()
+                        DropdownMenuItem(
+                            text = { 
+                                Text(
+                                    "OK", 
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    fontWeight = FontWeight.Bold
+                                ) 
+                            },
+                            onClick = {
+                                expandedFilters = false
+                            }
+                        )
+                        HorizontalDivider()
+                        DropdownMenuItem(
+                            text = { 
+                                Text(
+                                    "Clear All", 
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                ) 
+                            },
+                            onClick = {
+                                onMuscleGroupsChange(emptySet())
+                                expandedFilters = false
+                            }
+                        )
+                    }
                 }
             }
 
@@ -133,6 +225,20 @@ fun WorkoutsScreen(
 
 @Composable
 fun ExerciseCard(exercise: Exercise, onClick: () -> Unit) {
+    val focusIcon = when (exercise.focusArea) {
+        "Full Body" -> Icons.Default.AccessibilityNew
+        "Upper Body" -> Icons.Default.SportsHandball
+        "Lower Body" -> Icons.AutoMirrored.Filled.DirectionsWalk
+        else -> Icons.Default.AccessibilityNew
+    }
+
+    val typeIcon = when (exercise.trainingType) {
+        "Resistance" -> Icons.Default.FitnessCenter
+        "Cardio" -> Icons.AutoMirrored.Filled.DirectionsRun
+        "Mobility" -> Icons.Default.SelfImprovement
+        else -> Icons.Default.FitnessCenter
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -144,37 +250,76 @@ fun ExerciseCard(exercise: Exercise, onClick: () -> Unit) {
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = exercise.name,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(40.dp)
             ) {
-                Text(
-                    text = exercise.muscleGroup,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary
+                Icon(
+                    imageVector = focusIcon,
+                    contentDescription = exercise.focusArea,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
-                Text(
-                    text = exercise.difficulty,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.tertiary
+                Spacer(modifier = Modifier.height(8.dp))
+                Icon(
+                    imageVector = typeIcon,
+                    contentDescription = exercise.trainingType,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.secondary
                 )
             }
-            Text(
-                text = "Equipment: ${exercise.equipment}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.tertiary
-            )
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = exercise.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SuggestionChip(
+                        onClick = { },
+                        label = { Text(exercise.focusArea, style = MaterialTheme.typography.labelSmall) },
+                        modifier = Modifier.height(24.dp)
+                    )
+                    SuggestionChip(
+                        onClick = { },
+                        label = { Text(exercise.trainingType, style = MaterialTheme.typography.labelSmall) },
+                        modifier = Modifier.height(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = exercise.muscleGroup,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        text = exercise.difficulty,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            }
         }
     }
 }
@@ -185,6 +330,10 @@ fun WorkoutsScreenPreview() {
     com.example.personalgymapp.ui.theme.PersonalGymAppTheme {
         WorkoutsScreen(
             exercises = com.example.personalgymapp.data.mockExercises,
+            searchQuery = "",
+            onSearchQueryChange = {},
+            selectedMuscleGroups = emptySet(),
+            onMuscleGroupsChange = {},
             onExerciseClick = {},
             onAddExerciseClick = {},
             onBackClick = {}

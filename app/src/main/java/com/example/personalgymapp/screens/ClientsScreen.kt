@@ -1,31 +1,62 @@
 package com.example.personalgymapp.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.components.AddActionFab
 import com.example.personalgymapp.database.entity.ClientEntity
+import com.example.personalgymapp.model.Subscription
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientsScreen(
     clients: List<ClientEntity>,
+    subscriptions: List<Subscription>,
     onBackClick: () -> Unit,
     onClientClick: (Int) -> Unit,
     onAddClientClick: () -> Unit
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedPlan by remember { mutableStateOf("All Plans") }
+    var expandedPlanFilter by remember { mutableStateOf(false) }
+
+    val allPlans = listOf("All Plans") + subscriptions.map { it.planName }.distinct()
+
+    val filteredClients = clients.filter { client ->
+        val matchesSearch = client.name.contains(searchQuery, ignoreCase = true)
+        val clientSubscription = subscriptions.find { it.clientId == client.id }
+        val matchesPlan = selectedPlan == "All Plans" || clientSubscription?.planName == selectedPlan
+        matchesSearch && matchesPlan
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Clients") },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null
+                        )
+                        Text("Clients")
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -39,13 +70,10 @@ fun ClientsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddClientClick,
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Client")
-            }
+            AddActionFab(
+                label = "Add Client",
+                onClick = onAddClientClick
+            )
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
@@ -63,13 +91,67 @@ fun ClientsScreen(
             
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (clients.isEmpty()) {
+            // Search and Filter UI
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text("Search by name") },
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = selectedPlan,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Filter by Subscription Plan") },
+                    trailingIcon = {
+                        IconButton(onClick = { expandedPlanFilter = !expandedPlanFilter }) {
+                            Icon(
+                                imageVector = if (expandedPlanFilter) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                DropdownMenu(
+                    expanded = expandedPlanFilter,
+                    onDismissRequest = { expandedPlanFilter = false },
+                    modifier = Modifier.fillMaxWidth(0.9f)
+                ) {
+                    allPlans.forEach { plan ->
+                        DropdownMenuItem(
+                            text = { Text(plan) },
+                            onClick = {
+                                selectedPlan = plan
+                                expandedPlanFilter = false
+                            }
+                        )
+                    }
+                }
+                // Transparent clickable layer to open dropdown on text click
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .padding(top = 8.dp)
+                        .clickable { expandedPlanFilter = !expandedPlanFilter }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (filteredClients.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No clients yet",
+                        text = if (clients.isEmpty()) "No clients yet" else "No matching clients",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -79,8 +161,13 @@ fun ClientsScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(clients) { client ->
-                        ClientCard(client = client, onClick = { onClientClick(client.id) })
+                    items(filteredClients) { client ->
+                        val plan = subscriptions.find { it.clientId == client.id }?.planName ?: "No Plan"
+                        ClientCard(
+                            client = client,
+                            planName = plan,
+                            onClick = { onClientClick(client.id) }
+                        )
                     }
                 }
             }
@@ -89,7 +176,7 @@ fun ClientsScreen(
 }
 
 @Composable
-fun ClientCard(client: ClientEntity, onClick: () -> Unit) {
+fun ClientCard(client: ClientEntity, planName: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -101,39 +188,54 @@ fun ClientCard(client: ClientEntity, onClick: () -> Unit) {
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = client.name,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
-            Text(
-                text = client.goal,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Sessions: ${client.sessionsCompleted}",
-                    style = MaterialTheme.typography.bodySmall,
+                    text = client.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = "Plan: $planName",
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.tertiary
                 )
                 Text(
-                    text = "Next: ${client.nextSession}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.tertiary
+                    text = client.goal,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary
                 )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Sessions: ${client.sessionsCompleted}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                    Text(
+                        text = "Next: ${client.nextSession}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
             }
         }
     }

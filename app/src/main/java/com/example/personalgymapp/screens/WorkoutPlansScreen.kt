@@ -5,14 +5,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.components.AddActionFab
 import com.example.personalgymapp.model.WorkoutPlan
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,7 +28,18 @@ fun WorkoutPlansScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Workout Plans") },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Assignment,
+                            contentDescription = null
+                        )
+                        Text("Workout Plans")
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -48,12 +60,9 @@ fun WorkoutPlansScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onCreateWorkoutClick,
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary,
-                icon = { Icon(Icons.Default.Add, contentDescription = null) },
-                text = { Text("Create Workout") }
+            AddActionFab(
+                label = "Create Workout",
+                onClick = onCreateWorkoutClick
             )
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -118,12 +127,22 @@ fun WorkoutPlanCard(workoutPlan: WorkoutPlan, onClick: () -> Unit) {
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Text(
-                text = workoutPlan.name,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Assignment,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = workoutPlan.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
             Text(
                 text = "Client: ${workoutPlan.clientName}",
                 style = MaterialTheme.typography.bodyMedium,

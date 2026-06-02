@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val database = AppDatabase.getDatabase(this)
-        val repository = ClientRepository(database.clientDao())
+        val repository = ClientRepository(database.clientDao(), database.subscriptionDao())
         val viewModel = ViewModelProvider(this, ClientViewModelFactory(repository))[ClientViewModel::class.java]
         
         viewModel.seedDatabaseIfEmpty()

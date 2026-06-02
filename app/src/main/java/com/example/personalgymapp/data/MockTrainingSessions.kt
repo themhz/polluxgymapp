@@ -74,5 +74,17 @@ val mockTrainingSessions = listOf(
         status = "Scheduled",
         notes = "Upper body push focus.",
         workoutPlanId = 1
+    ),
+    TrainingSession(
+        id = 7,
+        clientId = 6,
+        clientName = "Themis",
+        date = "2024-06-15",
+        time = "09:00 AM",
+        durationMinutes = 30,
+        sessionType = "Cardio",
+        status = "Scheduled",
+        notes = "First session with jump rope focus.",
+        workoutPlanId = 3
     )
 )

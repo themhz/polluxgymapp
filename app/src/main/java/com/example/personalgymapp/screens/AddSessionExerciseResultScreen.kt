@@ -180,6 +180,14 @@ fun AddSessionExerciseResultScreen(
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 1
                 )
+
+                OutlinedTextField(
+                    value = state.rest,
+                    onValueChange = { state.rest = it },
+                    label = { Text("Rest Taken (seconds)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
                 
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -203,6 +211,7 @@ fun AddSessionExerciseResultScreen(
                         val r = state.reps.toIntOrNull()
                         val w = state.weight.toDoubleOrNull()
                         val d = state.duration.toIntOrNull()
+                        val res = state.rest.toIntOrNull()
                         
                         if (r == null && d == null) {
                             // At least reps or duration required
@@ -215,6 +224,7 @@ fun AddSessionExerciseResultScreen(
                                 reps = r,
                                 weightKg = w,
                                 durationSeconds = d,
+                                restSecondsDone = res,
                                 notes = state.notes
                             ))
                         }
@@ -245,5 +255,6 @@ class SetInputState {
     var reps by mutableStateOf("")
     var weight by mutableStateOf("")
     var duration by mutableStateOf("")
+    var rest by mutableStateOf("")
     var notes by mutableStateOf("")
 }

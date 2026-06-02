@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.components.AppLogo
 
 @Composable
 fun LoginScreen(
@@ -34,7 +35,7 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Personal Trainer App",
+                text = "Power Cat Gym",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -46,6 +47,10 @@ fun LoginScreen(
             )
 
             Spacer(modifier = Modifier.height(32.dp))
+            
+            AppLogo(size = 80.dp)
+            
+            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = email,

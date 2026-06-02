@@ -6,5 +6,7 @@ data class Exercise(
     val muscleGroup: String,
     val equipment: String,
     val difficulty: String,
-    val instructions: String
+    val instructions: String,
+    val focusArea: String = "Upper Body", // Full Body, Upper Body, Lower Body
+    val trainingType: String = "Resistance" // Resistance, Cardio, Mobility
 )

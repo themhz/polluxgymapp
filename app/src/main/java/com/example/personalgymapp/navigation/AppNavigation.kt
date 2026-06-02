@@ -4,7 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,6 +25,11 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
     val progressEntriesList = remember { mutableStateListOf(*mockProgressEntries.toTypedArray()) }
     val trainingSessionsList = remember { mutableStateListOf(*mockTrainingSessions.toTypedArray()) }
     val sessionResultsList = remember { mutableStateListOf(*mockSessionExerciseResults.toTypedArray()) }
+    val subscriptions by clientViewModel.subscriptions.collectAsState()
+
+    // Filter states for Exercise Library (hoisted to survive back navigation)
+    var exerciseSearchQuery by remember { mutableStateOf("") }
+    var exerciseSelectedMuscleGroups by remember { mutableStateOf(setOf<String>()) }
 
     NavHost(
         navController = navController,
@@ -59,15 +66,59 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 onWorkoutsClick = { navController.navigate("workoutPlans") },
                 onProgressClick = { navController.navigate("progress") },
                 onCalendarClick = { navController.navigate("calendar") },
-                onSensorsClick = { navController.navigate("sensors") }
+                onSensorsClick = { navController.navigate("sensors") },
+                onGarminClick = { navController.navigate("garminSettings") },
+                onSubscriptionsClick = { navController.navigate("subscriptions") }
+            )
+        }
+        composable("subscriptions") {
+            SubscriptionsScreen(
+                subscriptions = subscriptions,
+                onAddSubscriptionClick = { navController.navigate("addSubscription") },
+                onSubscriptionClick = { subId -> navController.navigate("editSubscription/$subId") },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "editSubscription/{subscriptionId}",
+            arguments = listOf(navArgument("subscriptionId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val subId = backStackEntry.arguments?.getInt("subscriptionId") ?: -1
+            val subscription = subscriptions.find { it.id == subId }
+            
+            EditSubscriptionScreen(
+                subscription = subscription,
+                onSaveSubscription = { updatedSub ->
+                    clientViewModel.updateSubscription(updatedSub)
+                    navController.popBackStack()
+                },
+                onDeleteSubscription = { subToDelete ->
+                    clientViewModel.deleteSubscription(subToDelete)
+                    navController.popBackStack()
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable("addSubscription") {
+            AddSubscriptionScreen(
+                clients = clients,
+                onSaveSubscription = { newSub ->
+                    clientViewModel.addSubscription(newSub)
+                    navController.popBackStack()
+                },
+                onBackClick = { navController.popBackStack() }
             )
         }
         composable("sensors") {
             SensorsScreen(onBackClick = { navController.popBackStack() })
         }
+        composable("garminSettings") {
+            GarminSettingsScreen(onBackClick = { navController.popBackStack() })
+        }
         composable("clients") {
             ClientsScreen(
                 clients = clients,
+                subscriptions = subscriptions,
                 onBackClick = { navController.popBackStack() },
                 onClientClick = { clientId -> 
                     navController.navigate("clientDetails/$clientId") 
@@ -92,6 +143,26 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             val client = clients.find { it.id == clientId }
             ClientDetailsScreen(
                 client = client,
+                subscriptions = subscriptions,
+                workoutPlans = workoutPlansList,
+                trainingSessions = trainingSessionsList,
+                onEditClick = { id -> navController.navigate("editClient/$id") },
+                onWorkoutPlanClick = { planId -> navController.navigate("workoutPlanDetails/$planId") },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "editClient/{clientId}",
+            arguments = listOf(navArgument("clientId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val clientId = backStackEntry.arguments?.getInt("clientId") ?: -1
+            val client = clients.find { it.id == clientId }
+            EditClientScreen(
+                client = client,
+                onSaveClient = { updatedClient ->
+                    clientViewModel.updateClient(updatedClient)
+                    navController.popBackStack()
+                },
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -114,6 +185,39 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             val plan = workoutPlansList.find { it.id == planId }
             WorkoutPlanDetailsScreen(
                 workoutPlan = plan,
+                onExerciseClick = { exerciseId ->
+                    navController.navigate("editWorkoutExercise/${planId}/$exerciseId")
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "editWorkoutExercise/{workoutPlanId}/{exerciseId}",
+            arguments = listOf(
+                navArgument("workoutPlanId") { type = NavType.IntType },
+                navArgument("exerciseId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val planId = backStackEntry.arguments?.getInt("workoutPlanId") ?: -1
+            val exerciseId = backStackEntry.arguments?.getInt("exerciseId") ?: -1
+            val plan = workoutPlansList.find { it.id == planId }
+            
+            EditWorkoutExerciseScreen(
+                workoutPlan = plan,
+                exerciseId = exerciseId,
+                onSave = { updatedExercise ->
+                    val planIndex = workoutPlansList.indexOfFirst { it.id == planId }
+                    if (planIndex != -1) {
+                        val currentPlan = workoutPlansList[planIndex]
+                        val exerciseIndex = currentPlan.exercises.indexOfFirst { it.exerciseId == exerciseId }
+                        if (exerciseIndex != -1) {
+                            val updatedExercises = currentPlan.exercises.toMutableList()
+                            updatedExercises[exerciseIndex] = updatedExercise
+                            workoutPlansList[planIndex] = currentPlan.copy(exercises = updatedExercises)
+                        }
+                    }
+                    navController.popBackStack()
+                },
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -132,6 +236,10 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         composable("workouts") {
             WorkoutsScreen(
                 exercises = exercisesList,
+                searchQuery = exerciseSearchQuery,
+                onSearchQueryChange = { exerciseSearchQuery = it },
+                selectedMuscleGroups = exerciseSelectedMuscleGroups,
+                onMuscleGroupsChange = { exerciseSelectedMuscleGroups = it },
                 onExerciseClick = { exerciseId ->
                     navController.navigate("exerciseDetails/$exerciseId")
                 },
@@ -158,6 +266,25 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             val exercise = exercisesList.find { it.id == exerciseId }
             ExerciseDetailsScreen(
                 exercise = exercise,
+                onEditClick = { id -> navController.navigate("editExercise/$id") },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "editExercise/{exerciseId}",
+            arguments = listOf(navArgument("exerciseId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val exerciseId = backStackEntry.arguments?.getInt("exerciseId") ?: -1
+            val exercise = exercisesList.find { it.id == exerciseId }
+            EditExerciseScreen(
+                exercise = exercise,
+                onSaveExercise = { updatedExercise ->
+                    val index = exercisesList.indexOfFirst { it.id == exerciseId }
+                    if (index != -1) {
+                        exercisesList[index] = updatedExercise
+                    }
+                    navController.popBackStack()
+                },
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -213,6 +340,9 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             TrainingSessionDetailsScreen(
                 trainingSession = session,
                 workoutPlan = plan,
+                onWorkoutPlanClick = { planId ->
+                    navController.navigate("workoutPlanDetails/$planId")
+                },
                 onViewSessionResultsClick = { id ->
                     navController.navigate("sessionResults/$id")
                 },

@@ -23,13 +23,17 @@ fun AddExerciseScreen(
     var equipment by remember { mutableStateOf("") }
     var difficulty by remember { mutableStateOf("Beginner") }
     var instructions by remember { mutableStateOf("") }
+    var focusArea by remember { mutableStateOf("Upper Body") }
+    var trainingType by remember { mutableStateOf("Resistance") }
 
     var nameError by remember { mutableStateOf<String?>(null) }
     var muscleGroupError by remember { mutableStateOf<String?>(null) }
     var instructionsError by remember { mutableStateOf<String?>(null) }
 
     val difficulties = listOf("Beginner", "Intermediate", "Advanced")
-    val muscleGroups = listOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Core")
+    val muscleGroups = listOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio")
+    val focusAreas = listOf("Upper Body", "Lower Body", "Full Body")
+    val trainingTypes = listOf("Resistance", "Cardio", "Mobility")
 
     Scaffold(
         topBar = {
@@ -145,6 +149,64 @@ fun AddExerciseScreen(
                 maxLines = 5
             )
 
+            var expandedFocus by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = expandedFocus,
+                onExpandedChange = { expandedFocus = !expandedFocus }
+            ) {
+                OutlinedTextField(
+                    value = focusArea,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Focus Area") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFocus) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedFocus,
+                    onDismissRequest = { expandedFocus = false }
+                ) {
+                    focusAreas.forEach { focus ->
+                        DropdownMenuItem(
+                            text = { Text(focus) },
+                            onClick = {
+                                focusArea = focus
+                                expandedFocus = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            var expandedType by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = expandedType,
+                onExpandedChange = { expandedType = !expandedType }
+            ) {
+                OutlinedTextField(
+                    value = trainingType,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Training Type") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedType) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedType,
+                    onDismissRequest = { expandedType = false }
+                ) {
+                    trainingTypes.forEach { type ->
+                        DropdownMenuItem(
+                            text = { Text(type) },
+                            onClick = {
+                                trainingType = type
+                                expandedType = false
+                            }
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
@@ -170,7 +232,9 @@ fun AddExerciseScreen(
                             muscleGroup = muscleGroup,
                             equipment = equipment.ifBlank { "None" },
                             difficulty = difficulty,
-                            instructions = instructions
+                            instructions = instructions,
+                            focusArea = focusArea,
+                            trainingType = trainingType
                         )
                         onSaveExercise(newExercise)
                     }
