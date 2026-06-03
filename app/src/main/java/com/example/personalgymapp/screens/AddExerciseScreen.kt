@@ -11,8 +11,10 @@ import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.personalgymapp.R
 import com.example.personalgymapp.model.Exercise
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,19 +48,41 @@ fun AddExerciseScreen(
         selectedVideoUri = uri?.toString()
     }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     var nameError by remember { mutableStateOf<String?>(null) }
     var muscleGroupError by remember { mutableStateOf<String?>(null) }
     var instructionsError by remember { mutableStateOf<String?>(null) }
 
-    val difficulties = listOf("Beginner", "Intermediate", "Advanced")
-    val muscleGroups = listOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio")
-    val focusAreas = listOf("Upper Body", "Lower Body", "Full Body")
-    val trainingTypes = listOf("Resistance", "Cardio", "Mobility")
+    val difficulties = mapOf(
+        "Beginner" to stringResource(R.string.diff_beginner),
+        "Intermediate" to stringResource(R.string.diff_intermediate),
+        "Advanced" to stringResource(R.string.diff_advanced)
+    )
+    val muscleGroups = mapOf(
+        "Chest" to stringResource(R.string.mg_chest),
+        "Back" to stringResource(R.string.mg_back),
+        "Legs" to stringResource(R.string.mg_legs),
+        "Shoulders" to stringResource(R.string.mg_shoulders),
+        "Arms" to stringResource(R.string.mg_arms),
+        "Core" to stringResource(R.string.mg_core),
+        "Cardio" to stringResource(R.string.mg_cardio)
+    )
+    val focusAreas = mapOf(
+        "Upper Body" to stringResource(R.string.focus_upper),
+        "Lower Body" to stringResource(R.string.focus_lower),
+        "Full Body" to stringResource(R.string.focus_full)
+    )
+    val trainingTypes = mapOf(
+        "Resistance" to stringResource(R.string.tt_resistance),
+        "Cardio" to stringResource(R.string.tt_cardio),
+        "Mobility" to stringResource(R.string.tt_mobility)
+    )
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add Exercise") },
+                title = { Text(stringResource(R.string.add_exercise)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -84,23 +108,23 @@ fun AddExerciseScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it; nameError = null },
-                label = { Text("Exercise Name") },
+                label = { Text(stringResource(R.string.exercise_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = nameError != null,
                 supportingText = { nameError?.let { Text(it) } }
             )
 
-            // Muscle Group selection (using a simple dropdown or similar)
+            // Muscle Group selection
             var expandedMuscle by remember { mutableStateOf(false) }
             ExposedDropdownMenuBox(
                 expanded = expandedMuscle,
                 onExpandedChange = { expandedMuscle = !expandedMuscle }
             ) {
                 OutlinedTextField(
-                    value = muscleGroup,
+                    value = muscleGroups[muscleGroup] ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Muscle Group") },
+                    label = { Text(stringResource(R.string.muscle_group)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMuscle) },
                     modifier = Modifier.menuAnchor().fillMaxWidth(),
                     isError = muscleGroupError != null,
@@ -110,11 +134,11 @@ fun AddExerciseScreen(
                     expanded = expandedMuscle,
                     onDismissRequest = { expandedMuscle = false }
                 ) {
-                    muscleGroups.forEach { group ->
+                    muscleGroups.forEach { (key, label) ->
                         DropdownMenuItem(
-                            text = { Text(group) },
+                            text = { Text(label) },
                             onClick = {
-                                muscleGroup = group
+                                muscleGroup = key
                                 expandedMuscle = false
                                 muscleGroupError = null
                             }
@@ -126,8 +150,9 @@ fun AddExerciseScreen(
             OutlinedTextField(
                 value = equipment,
                 onValueChange = { equipment = it },
-                label = { Text("Equipment (e.g. Dumbbells, Barbell)") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text(stringResource(R.string.equipment)) },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(stringResource(R.string.equipment_hint)) }
             )
 
             var expandedDiff by remember { mutableStateOf(false) }
@@ -136,10 +161,10 @@ fun AddExerciseScreen(
                 onExpandedChange = { expandedDiff = !expandedDiff }
             ) {
                 OutlinedTextField(
-                    value = difficulty,
+                    value = difficulties[difficulty] ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Difficulty") },
+                    label = { Text(stringResource(R.string.difficulty)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDiff) },
                     modifier = Modifier.menuAnchor().fillMaxWidth()
                 )
@@ -147,11 +172,11 @@ fun AddExerciseScreen(
                     expanded = expandedDiff,
                     onDismissRequest = { expandedDiff = false }
                 ) {
-                    difficulties.forEach { diff ->
+                    difficulties.forEach { (key, label) ->
                         DropdownMenuItem(
-                            text = { Text(diff) },
+                            text = { Text(label) },
                             onClick = {
-                                difficulty = diff
+                                difficulty = key
                                 expandedDiff = false
                             }
                         )
@@ -162,7 +187,7 @@ fun AddExerciseScreen(
             OutlinedTextField(
                 value = instructions,
                 onValueChange = { instructions = it; instructionsError = null },
-                label = { Text("Instructions") },
+                label = { Text(stringResource(R.string.instructions)) },
                 modifier = Modifier.fillMaxWidth().height(150.dp),
                 isError = instructionsError != null,
                 supportingText = { instructionsError?.let { Text(it) } },
@@ -175,10 +200,10 @@ fun AddExerciseScreen(
                 onExpandedChange = { expandedFocus = !expandedFocus }
             ) {
                 OutlinedTextField(
-                    value = focusArea,
+                    value = focusAreas[focusArea] ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Focus Area") },
+                    label = { Text(stringResource(R.string.focus_area)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFocus) },
                     modifier = Modifier.menuAnchor().fillMaxWidth()
                 )
@@ -186,11 +211,11 @@ fun AddExerciseScreen(
                     expanded = expandedFocus,
                     onDismissRequest = { expandedFocus = false }
                 ) {
-                    focusAreas.forEach { focus ->
+                    focusAreas.forEach { (key, label) ->
                         DropdownMenuItem(
-                            text = { Text(focus) },
+                            text = { Text(label) },
                             onClick = {
-                                focusArea = focus
+                                focusArea = key
                                 expandedFocus = false
                             }
                         )
@@ -204,10 +229,10 @@ fun AddExerciseScreen(
                 onExpandedChange = { expandedType = !expandedType }
             ) {
                 OutlinedTextField(
-                    value = trainingType,
+                    value = trainingTypes[trainingType] ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Training Type") },
+                    label = { Text(stringResource(R.string.training_type)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedType) },
                     modifier = Modifier.menuAnchor().fillMaxWidth()
                 )
@@ -215,11 +240,11 @@ fun AddExerciseScreen(
                     expanded = expandedType,
                     onDismissRequest = { expandedType = false }
                 ) {
-                    trainingTypes.forEach { type ->
+                    trainingTypes.forEach { (key, label) ->
                         DropdownMenuItem(
-                            text = { Text(type) },
+                            text = { Text(label) },
                             onClick = {
-                                trainingType = type
+                                trainingType = key
                                 expandedType = false
                             }
                         )
@@ -230,7 +255,7 @@ fun AddExerciseScreen(
             OutlinedTextField(
                 value = imageResName,
                 onValueChange = { imageResName = it },
-                label = { Text("Image Resource Name (Optional)") },
+                label = { Text(stringResource(R.string.image_res)) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("e.g. squats") }
             )
@@ -241,7 +266,7 @@ fun AddExerciseScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "External Image", style = MaterialTheme.typography.labelLarge)
+                    Text(text = stringResource(R.string.external_image), style = MaterialTheme.typography.labelLarge)
                     Spacer(Modifier.height(8.dp))
                     if (selectedImageUri != null) {
                         AsyncImage(
@@ -259,7 +284,7 @@ fun AddExerciseScreen(
                     ) {
                         Icon(Icons.Default.CloudUpload, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text(if (selectedImageUri == null) "Select Image from Device" else "Change Image")
+                        Text(if (selectedImageUri == null) stringResource(R.string.select_image) else stringResource(R.string.change_image))
                     }
                 }
             }
@@ -267,7 +292,7 @@ fun AddExerciseScreen(
             OutlinedTextField(
                 value = videoResName,
                 onValueChange = { videoResName = it },
-                label = { Text("Video Resource Name (Optional)") },
+                label = { Text(stringResource(R.string.video_res)) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("e.g. running") }
             )
@@ -278,7 +303,7 @@ fun AddExerciseScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "External Video", style = MaterialTheme.typography.labelLarge)
+                    Text(text = stringResource(R.string.external_video), style = MaterialTheme.typography.labelLarge)
                     Spacer(Modifier.height(8.dp))
                     if (selectedVideoUri != null) {
                         Text(
@@ -294,7 +319,7 @@ fun AddExerciseScreen(
                     ) {
                         Icon(Icons.Default.CloudUpload, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text(if (selectedVideoUri == null) "Select Video from Device" else "Change Video")
+                        Text(if (selectedVideoUri == null) stringResource(R.string.select_video) else stringResource(R.string.change_video))
                     }
                 }
             }
@@ -305,15 +330,15 @@ fun AddExerciseScreen(
                 onClick = {
                     var isValid = true
                     if (name.isBlank()) {
-                        nameError = "Name is required"
+                        nameError = context.getString(R.string.error_name_required)
                         isValid = false
                     }
                     if (muscleGroup.isBlank()) {
-                        muscleGroupError = "Muscle group is required"
+                        muscleGroupError = context.getString(R.string.error_mg_required)
                         isValid = false
                     }
                     if (instructions.isBlank()) {
-                        instructionsError = "Instructions are required"
+                        instructionsError = context.getString(R.string.error_instr_required)
                         isValid = false
                     }
 
@@ -337,7 +362,7 @@ fun AddExerciseScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save Exercise")
+                Text(stringResource(R.string.save_exercise))
             }
         }
     }

@@ -22,10 +22,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
+import com.example.personalgymapp.R
 import com.example.personalgymapp.model.Exercise
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +40,7 @@ fun ExerciseDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(exercise?.name ?: "Exercise Details") },
+                title = { Text(exercise?.name ?: stringResource(R.string.exercise_library)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -71,6 +73,32 @@ fun ExerciseDetailsScreen(
             }
         } else {
             val context = LocalContext.current
+
+            val muscleGroups = mapOf(
+                "Chest" to stringResource(R.string.mg_chest),
+                "Back" to stringResource(R.string.mg_back),
+                "Legs" to stringResource(R.string.mg_legs),
+                "Shoulders" to stringResource(R.string.mg_shoulders),
+                "Arms" to stringResource(R.string.mg_arms),
+                "Core" to stringResource(R.string.mg_core),
+                "Cardio" to stringResource(R.string.mg_cardio)
+            )
+            val focusAreas = mapOf(
+                "Upper Body" to stringResource(R.string.focus_upper),
+                "Lower Body" to stringResource(R.string.focus_lower),
+                "Full Body" to stringResource(R.string.focus_full)
+            )
+            val trainingTypes = mapOf(
+                "Resistance" to stringResource(R.string.tt_resistance),
+                "Cardio" to stringResource(R.string.tt_cardio),
+                "Mobility" to stringResource(R.string.tt_mobility)
+            )
+            val difficulties = mapOf(
+                "Beginner" to stringResource(R.string.diff_beginner),
+                "Intermediate" to stringResource(R.string.diff_intermediate),
+                "Advanced" to stringResource(R.string.diff_advanced)
+            )
+
             val imageModel = remember(exercise.imageResName, exercise.imageUri) {
                 if (exercise.imageUri != null) {
                     exercise.imageUri
@@ -145,16 +173,16 @@ fun ExerciseDetailsScreen(
                     )
                 }
 
-                ExerciseDetailItem(label = "Focus Area", value = exercise.focusArea)
-                ExerciseDetailItem(label = "Training Type", value = exercise.trainingType)
-                ExerciseDetailItem(label = "Muscle Group", value = exercise.muscleGroup)
-                ExerciseDetailItem(label = "Equipment", value = exercise.equipment)
-                ExerciseDetailItem(label = "Difficulty", value = exercise.difficulty)
+                ExerciseDetailItem(label = stringResource(R.string.focus_area), value = focusAreas[exercise.focusArea] ?: exercise.focusArea)
+                ExerciseDetailItem(label = stringResource(R.string.training_type), value = trainingTypes[exercise.trainingType] ?: exercise.trainingType)
+                ExerciseDetailItem(label = stringResource(R.string.muscle_group), value = muscleGroups[exercise.muscleGroup] ?: exercise.muscleGroup)
+                ExerciseDetailItem(label = stringResource(R.string.equipment), value = exercise.equipment)
+                ExerciseDetailItem(label = stringResource(R.string.difficulty), value = difficulties[exercise.difficulty] ?: exercise.difficulty)
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
-                    text = "Instructions",
+                    text = stringResource(R.string.instructions),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold

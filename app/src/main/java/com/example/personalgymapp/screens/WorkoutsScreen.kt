@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -44,7 +45,15 @@ fun WorkoutsScreen(
     onAddExerciseClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
-    val allMuscleGroups = listOf("Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio")
+    val muscleGroupMap = mapOf(
+        "Chest" to stringResource(R.string.mg_chest),
+        "Back" to stringResource(R.string.mg_back),
+        "Legs" to stringResource(R.string.mg_legs),
+        "Shoulders" to stringResource(R.string.mg_shoulders),
+        "Arms" to stringResource(R.string.mg_arms),
+        "Core" to stringResource(R.string.mg_core),
+        "Cardio" to stringResource(R.string.mg_cardio)
+    )
 
     val filteredExercises = exercises.filter {
         val matchesSearch = it.name.contains(searchQuery, ignoreCase = true)
@@ -64,7 +73,7 @@ fun WorkoutsScreen(
                             imageVector = Icons.Default.FitnessCenter,
                             contentDescription = null
                         )
-                        Text("Exercise Library")
+                        Text(stringResource(R.string.exercise_library))
                     }
                 },
                 navigationIcon = {
@@ -81,7 +90,7 @@ fun WorkoutsScreen(
         },
         floatingActionButton = {
             AddActionFab(
-                label = "Add Exercise",
+                label = stringResource(R.string.add_exercise),
                 onClick = onAddExerciseClick
             )
         },
@@ -94,7 +103,7 @@ fun WorkoutsScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Browse exercises for workout planning",
+                text = stringResource(R.string.browse_exercises),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.tertiary
             )
@@ -104,7 +113,7 @@ fun WorkoutsScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
-                label = { Text("Search exercises") },
+                label = { Text(stringResource(R.string.search_exercises)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -114,11 +123,17 @@ fun WorkoutsScreen(
             // Multi-select Dropdown for Muscle Groups
             var expandedFilters by remember { mutableStateOf(false) }
             Box(modifier = Modifier.fillMaxWidth()) {
+                val selectedText = if (selectedMuscleGroups.isEmpty()) {
+                    stringResource(R.string.all_muscle_groups)
+                } else {
+                    selectedMuscleGroups.map { muscleGroupMap[it] ?: it }.joinToString(", ")
+                }
+
                 OutlinedTextField(
-                    value = if (selectedMuscleGroups.isEmpty()) "All Muscle Groups" else selectedMuscleGroups.joinToString(", "),
+                    value = selectedText,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Filter by Muscle Group") },
+                    label = { Text(stringResource(R.string.filter_by_muscle_group)) },
                     trailingIcon = {
                         IconButton(onClick = { expandedFilters = !expandedFilters }) {
                             Icon(
@@ -144,8 +159,8 @@ fun WorkoutsScreen(
                     onDismissRequest = { expandedFilters = false },
                     modifier = Modifier.fillMaxWidth(0.9f)
                 ) {
-                    allMuscleGroups.forEach { group ->
-                        val isSelected = selectedMuscleGroups.contains(group)
+                    muscleGroupMap.forEach { (key, label) ->
+                        val isSelected = selectedMuscleGroups.contains(key)
                         DropdownMenuItem(
                             text = {
                                 Row(
@@ -157,12 +172,12 @@ fun WorkoutsScreen(
                                         onCheckedChange = null
                                     )
                                     Spacer(Modifier.width(8.dp))
-                                    Text(group)
+                                    Text(label)
                                 }
                             },
                             onClick = {
                                 val current = selectedMuscleGroups.toMutableSet()
-                                if (isSelected) current.remove(group) else current.add(group)
+                                if (isSelected) current.remove(key) else current.add(key)
                                 onMuscleGroupsChange(current)
                             }
                         )
@@ -172,7 +187,7 @@ fun WorkoutsScreen(
                         DropdownMenuItem(
                             text = { 
                                 Text(
-                                    "OK", 
+                                    stringResource(R.string.ok), 
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -187,7 +202,7 @@ fun WorkoutsScreen(
                         DropdownMenuItem(
                             text = { 
                                 Text(
-                                    "Clear All", 
+                                    stringResource(R.string.clear_all), 
                                     color = MaterialTheme.colorScheme.error,
                                     modifier = Modifier.fillMaxWidth(),
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -210,7 +225,7 @@ fun WorkoutsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No exercises found",
+                        text = stringResource(R.string.no_exercises_found),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -223,7 +238,8 @@ fun WorkoutsScreen(
                     items(filteredExercises) { exercise ->
                         ExerciseCard(
                             exercise = exercise,
-                            onClick = { onExerciseClick(exercise.id) }
+                            onClick = { onExerciseClick(exercise.id) },
+                            muscleGroupLabel = muscleGroupMap[exercise.muscleGroup] ?: exercise.muscleGroup
                         )
                     }
                 }
@@ -233,7 +249,7 @@ fun WorkoutsScreen(
 }
 
 @Composable
-fun ExerciseCard(exercise: Exercise, onClick: () -> Unit) {
+fun ExerciseCard(exercise: Exercise, onClick: () -> Unit, muscleGroupLabel: String) {
     val context = LocalContext.current
     
     // Determine the image model for Coil
@@ -344,7 +360,7 @@ fun ExerciseCard(exercise: Exercise, onClick: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = exercise.muscleGroup,
+                        text = muscleGroupLabel,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.secondary
                     )

@@ -14,8 +14,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.R
 import com.example.personalgymapp.components.AddActionFab
 import com.example.personalgymapp.database.entity.ClientEntity
 import com.example.personalgymapp.model.Subscription
@@ -54,7 +56,7 @@ fun ClientsScreen(
                             imageVector = Icons.Default.Person,
                             contentDescription = null
                         )
-                        Text("Clients")
+                        Text(stringResource(R.string.clients))
                     }
                 },
                 navigationIcon = {
@@ -71,7 +73,7 @@ fun ClientsScreen(
         },
         floatingActionButton = {
             AddActionFab(
-                label = "Add Client",
+                label = stringResource(R.string.add_client),
                 onClick = onAddClientClick
             )
         },
@@ -84,7 +86,7 @@ fun ClientsScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Manage your training clients",
+                text = stringResource(R.string.manage_clients),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.tertiary
             )
@@ -95,7 +97,7 @@ fun ClientsScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                label = { Text("Search by name") },
+                label = { Text(stringResource(R.string.search_by_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true
@@ -108,7 +110,7 @@ fun ClientsScreen(
                     value = selectedPlan,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Filter by Subscription Plan") },
+                    label = { Text(stringResource(R.string.filter_by_plan)) },
                     trailingIcon = {
                         IconButton(onClick = { expandedPlanFilter = !expandedPlanFilter }) {
                             Icon(
@@ -126,7 +128,7 @@ fun ClientsScreen(
                 ) {
                     allPlans.forEach { plan ->
                         DropdownMenuItem(
-                            text = { Text(plan) },
+                            text = { Text(if (plan == "All Plans") stringResource(R.string.all_plans) else plan) },
                             onClick = {
                                 selectedPlan = plan
                                 expandedPlanFilter = false
@@ -151,7 +153,7 @@ fun ClientsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (clients.isEmpty()) "No clients yet" else "No matching clients",
+                        text = if (clients.isEmpty()) stringResource(R.string.no_clients_yet) else stringResource(R.string.no_matching_clients),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -209,7 +211,7 @@ fun ClientCard(client: ClientEntity, planName: String, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "Plan: $planName",
+                    text = stringResource(R.string.client_plan, planName),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.tertiary
                 )
@@ -226,12 +228,12 @@ fun ClientCard(client: ClientEntity, planName: String, onClick: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Sessions: ${client.sessionsCompleted}",
+                        text = stringResource(R.string.sessions_completed, client.sessionsCompleted),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.tertiary
                     )
                     Text(
-                        text = "Next: ${client.nextSession}",
+                        text = stringResource(R.string.next_session, client.nextSession),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.tertiary
                     )

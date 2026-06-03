@@ -75,10 +75,11 @@ fun ActiveWorkoutSessionScreen(
 
     // Helper to add a set result
     val completeSet = {
-        val reps = repsInput.toIntOrNull()
+        val reps = if (currentExercise.exerciseType == "REPS") repsInput.toIntOrNull() else null
         val weight = weightInput.toDoubleOrNull()
-        val duration = if (currentExercise.exerciseType == "TIME")
-            (currentExercise.targetDurationSeconds ?: 0) - (if (isResting) 0 else timerSeconds) else null
+        val duration = if (currentExercise.exerciseType == "TIME") {
+            if (currentExercise.timerType == "COUNTUP") timerSeconds else (currentExercise.targetDurationSeconds ?: 0) - timerSeconds
+        } else null
 
         val newSet = SessionSetResult(
             setNumber = currentExerciseSets.size + 1,
@@ -101,37 +102,58 @@ fun ActiveWorkoutSessionScreen(
             isTimerRunning = true
         } else {
             isResting = false
-            isTimerRunning = false
+            if (updatedList.size < currentExercise.sets && currentExercise.exerciseType == "TIME") {
+                timerSeconds = if (currentExercise.timerType == "COUNTUP") 0 else (currentExercise.targetDurationSeconds ?: 0)
+                isTimerRunning = true
+            } else {
+                isTimerRunning = false
+            }
         }
     }
 
     // Timer Logic
-    LaunchedEffect(isTimerRunning, isResting) {
-        while (isTimerRunning && timerSeconds > 0) {
-            delay(1000L)
-            timerSeconds -= 1
-        }
-        if (isTimerRunning && timerSeconds == 0) {
-            if (isResting) {
-                // Rest finished, log the actual rest time taken
-                val actualRest = currentExercise.restSeconds - timerSeconds
-                val updatedList = sessionProgress[currentExerciseIndex]?.toMutableList() ?: mutableListOf()
-                if (updatedList.isNotEmpty()) {
-                    val lastSet = updatedList.last()
-                    updatedList[updatedList.size - 1] = lastSet.copy(restSecondsDone = actualRest)
-                    sessionProgress[currentExerciseIndex] = updatedList
-                }
+    LaunchedEffect(isTimerRunning, isResting, currentExercise) {
+        while (isTimerRunning) {
+            val targetTime = if (isResting) 0 else {
+                if (currentExercise.exerciseType == "TIME" && currentExercise.timerType == "COUNTUP")
+                    currentExercise.targetDurationSeconds ?: 0
+                else 0
+            }
 
-                isResting = false
-                if (currentExercise.exerciseType == "TIME") {
-                    timerSeconds = currentExercise.targetDurationSeconds ?: 0
-                    isTimerRunning = true
-                } else {
-                    isTimerRunning = false
-                }
+            if (timerSeconds == targetTime) break
+
+            delay(1000L)
+            
+            if (isResting || (currentExercise.exerciseType == "TIME" && currentExercise.timerType == "COUNTDOWN")) {
+                timerSeconds -= 1
+            } else if (currentExercise.exerciseType == "TIME" && currentExercise.timerType == "COUNTUP") {
+                timerSeconds += 1
+            }
+        }
+
+        if (isTimerRunning) {
+            val isFinished = if (isResting) {
+                timerSeconds <= 0
             } else if (currentExercise.exerciseType == "TIME") {
-                // Exercise time finished, complete set automatically
-                completeSet()
+                if (currentExercise.timerType == "COUNTUP") {
+                    timerSeconds >= (currentExercise.targetDurationSeconds ?: 0)
+                } else {
+                    timerSeconds <= 0
+                }
+            } else false
+
+            if (isFinished) {
+                if (isResting) {
+                    isResting = false
+                    if (currentExercise.exerciseType == "TIME") {
+                        timerSeconds = if (currentExercise.timerType == "COUNTUP") 0 else (currentExercise.targetDurationSeconds ?: 0)
+                        isTimerRunning = true
+                    } else {
+                        isTimerRunning = false
+                    }
+                } else if (currentExercise.exerciseType == "TIME") {
+                    completeSet()
+                }
             }
         }
     }
@@ -140,9 +162,11 @@ fun ActiveWorkoutSessionScreen(
     LaunchedEffect(currentExerciseIndex) {
         isResting = false
         isTimerRunning = false
-        repsInput = workoutPlan.exercises[currentExerciseIndex].reps.toString()
-        timerSeconds = if (workoutPlan.exercises[currentExerciseIndex].exerciseType == "TIME")
-            workoutPlan.exercises[currentExerciseIndex].targetDurationSeconds ?: 0 else 0
+        val ex = workoutPlan.exercises[currentExerciseIndex]
+        repsInput = ex.reps.toString()
+        timerSeconds = if (ex.exerciseType == "TIME") {
+            if (ex.timerType == "COUNTUP") 0 else (ex.targetDurationSeconds ?: 0)
+        } else 0
         weightInput = ""
         notesInput = ""
     }
@@ -244,7 +268,7 @@ fun ActiveWorkoutSessionScreen(
                     onClick = { 
                         isStarted = true 
                         if (currentExercise.exerciseType == "TIME") {
-                            timerSeconds = currentExercise.targetDurationSeconds ?: 0
+                            timerSeconds = if (currentExercise.timerType == "COUNTUP") 0 else (currentExercise.targetDurationSeconds ?: 0)
                             isTimerRunning = true
                         }
                     },
@@ -311,8 +335,12 @@ fun ActiveWorkoutSessionScreen(
                     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text("Recorded Sets:", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
                         currentExerciseSets.forEach { set ->
-                            val resText = if (set.reps != null) "${set.reps} reps" else "${set.durationSeconds}s"
-                            val weightText = if (set.weightKg != null) " @ ${set.weightKg}kg" else ""
+                            val resText = if (currentExercise.exerciseType == "TIME") {
+                                "${set.durationSeconds ?: 0}s"
+                            } else {
+                                "${set.reps ?: 0} reps"
+                            }
+                            val weightText = if (set.weightKg != null && set.weightKg > 0) " @ ${set.weightKg}kg" else ""
                             Text(text = "Set ${set.setNumber}: $resText$weightText", style = MaterialTheme.typography.bodySmall)
                         }
                         

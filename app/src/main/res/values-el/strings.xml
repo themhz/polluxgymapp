@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Εφαρμογή Personal Trainer</string>
+    <string name="clients">Πελάτες</string>
+    <string name="workout_plans">Προγράμματα Προπόνησης</string>
+    <string name="progress">Πρόοδος</string>
+    <string name="training_sessions">Συνεδρίες Προπόνησης</string>
+    <string name="sensors">Αισθητήρες</string>
+    <string name="garmin">Garmin</string>
+    <string name="subscriptions">Συνδρομές</string>
+    <string name="settings">Ρυθμίσεις</string>
+    <string name="language">Γλώσσα</string>
+    <string name="currency">Νόμισμα</string>
+    <string name="number_format">Μορφή Αριθμών</string>
+    <string name="notifications">Ειδοποιήσεις</string>
+    <string name="dashboard_title">Πίνακας Ελέγχου Power Cat</string>
+    <string name="dashboard_subtitle">Διαχείριση πελατών, προγραμμάτων και προόδου</string>
+
+    <!-- Clients Screen -->
+    <string name="manage_clients">Διαχείριση των πελατών σας</string>
+    <string name="search_by_name">Αναζήτηση βάσει ονόματος</string>
+    <string name="filter_by_plan">Φιλτράρισμα βάσει Συνδρομής</string>
+    <string name="all_plans">Όλα τα Προγράμματα</string>
+    <string name="no_clients_yet">Δεν υπάρχουν ακόμα πελάτες</string>
+    <string name="no_matching_clients">Δεν βρέθηκαν πελάτες</string>
+    <string name="add_client">Προσθήκη Πελάτη</string>
+    <string name="client_plan">Πρόγραμμα: %s</string>
+    <string name="sessions_completed">Συνεδρίες: %d</string>
+    <string name="next_session">Επόμενη: %s</string>
+
+    <!-- Calendar Screen -->
+    <string name="schedule_manage_sessions">Προγραμματισμός και διαχείριση συνεδριών</string>
+    <string name="status_all">Όλες</string>
+    <string name="status_scheduled">Προγραμματισμένες</string>
+    <string name="status_completed">Ολοκληρωμένες</string>
+    <string name="status_cancelled">Ακυρωμένες</string>
+    <string name="add_session">Προσθήκη Συνεδρίας</string>
+    <string name="no_sessions_yet">Δεν υπάρχουν ακόμα συνεδρίες</string>
+    <string name="no_sessions_filtered">Δεν βρέθηκαν %s συνεδρίες</string>
+
+    <!-- Workout Plans Screen -->
+    <string name="manage_workout_plans">Δημιουργία και διαχείριση προγραμμάτων προπόνησης</string>
+    <string name="no_workout_plans_yet">Δεν υπάρχουν ακόμα προγράμματα</string>
+    <string name="no_matching_plans">Δεν βρέθηκαν προγράμματα</string>
+    <string name="create_workout">Δημιουργία Προπόνησης</string>
+    <string name="library">Βιβλιοθήκη</string>
+    <string name="exercises_count">%d Ασκήσεις</string>
+
+    <!-- Session Details -->
+    <string name="session_details">Λεπτομέρειες Συνεδρίας</string>
+    <string name="client">Πελάτης</string>
+    <string name="date">Ημερομηνία</string>
+    <string name="time">Ώρα</string>
+    <string name="duration">Διάρκεια</string>
+    <string name="duration_mins">%d λεπτά</string>
+    <string name="type">Τύπος</string>
+    <string name="status">Κατάσταση</string>
+    <string name="linked_plan">Συνδεδεμένο Πρόγραμμα</string>
+    <string name="no_plan_linked">Δεν υπάρχει συνδεδεμένο πρόγραμμα</string>
+    <string name="start_workout">Έναρξη Προπόνησης</string>
+    <string name="view_results">Προβολή Αποτελεσμάτων</string>
+    <string name="link_plan">Σύνδεση Προγράμματος</string>
+    <string name="change_plan">Αλλαγή Προγράμματος</string>
+    <string name="remove_plan">Αφαίρεση Προγράμματος</string>
+    <string name="session_notes">Σημειώσεις Συνεδρίας</string>
+
+    <!-- Settings -->
+    <string name="decimal_separator">Διαχωριστικό Δεκαδικών</string>
+    <string name="thousand_separator">Διαχωριστικό Χιλιάδων</string>
+    <string name="allow_notifications">Επιτρέπονται οι Ειδοποιήσεις</string>
+    <string name="dot">Τελεία (.)</string>
+    <string name="comma">Κόμμα (,)</string>
+    <string name="space">Κενό ( )</string>
+    <string name="euro">Ευρώ (€)</string>
+    <string name="dollar">Δολάριο ($)</string>
+    <string name="english">Αγγλικά (English)</string>
+    <string name="greek">Ελληνικά</string>
+
+    <!-- Exercise Library -->
+    <string name="exercise_library">Βιβλιοθήκη Ασκήσεων</string>
+    <string name="browse_exercises">Περιηγηθείτε στις ασκήσεις για προγραμματισμό προπόνησης</string>
+    <string name="search_exercises">Αναζήτηση ασκήσεων</string>
+    <string name="all_muscle_groups">Όλες οι Μυϊκές Ομάδες</string>
+    <string name="filter_by_muscle_group">Φιλτράρισμα ανά Μυϊκή Ομάδα</string>
+    <string name="no_exercises_found">Δεν βρέθηκαν ασκήσεις</string>
+    <string name="add_exercise">Προσθήκη Άσκησης</string>
+    <string name="ok">OK</string>
+    <string name="clear_all">Εκκαθάριση όλων</string>
+
+    <!-- Muscle Groups -->
+    <string name="mg_chest">Στήθος</string>
+    <string name="mg_back">Πλάτη</string>
+    <string name="mg_legs">Πόδια</string>
+    <string name="mg_shoulders">Ώμοι</string>
+    <string name="mg_arms">Χέρια</string>
+    <string name="mg_core">Κορμός</string>
+    <string name="mg_cardio">Καρδιοαναπνευστική</string>
+
+    <!-- Exercise Properties -->
+    <string name="difficulty">Δυσκολία</string>
+    <string name="diff_beginner">Αρχάριο</string>
+    <string name="diff_intermediate">Μεσαίο</string>
+    <string name="diff_advanced">Προχωρημένο</string>
+
+    <string name="focus_area">Περιοχή Εστίασης</string>
+    <string name="focus_upper">Άνω Μέρος Σώματος</string>
+    <string name="focus_lower">Κάτω Μέρος Σώματος</string>
+    <string name="focus_full">Όλο το Σώμα</string>
+
+    <string name="training_type">Τύπος Προπόνησης</string>
+    <string name="tt_resistance">Αντίσταση</string>
+    <string name="tt_cardio">Καρδιοαναπνευστική</string>
+    <string name="tt_mobility">Κινητικότητα</string>
+
+    <!-- Add Exercise -->
+    <string name="exercise_name">Όνομα Άσκησης</string>
+    <string name="muscle_group">Μυϊκή Ομάδα</string>
+    <string name="equipment">Εξοπλισμός</string>
+    <string name="equipment_hint">π.χ. Αλτήρες, Μπάρα</string>
+    <string name="instructions">Οδηγίες</string>
+    <string name="image_res">Όνομα Πηγής Εικόνας (Προαιρετικό)</string>
+    <string name="video_res">Όνομα Πηγής Βίντεο (Προαιρετικό)</string>
+    <string name="external_image">Εξωτερική Εικόνα</string>
+    <string name="external_video">Εξωτερικό Βίντεο</string>
+    <string name="select_image">Επιλογή Εικόνας από τη Συσκευή</string>
+    <string name="change_image">Αλλαγή Εικόνας</string>
+    <string name="select_video">Επιλογή Βίντεο από τη Συσκευή</string>
+    <string name="change_video">Αλλαγή Βίντεο</string>
+    <string name="save_exercise">Αποθήκευση Άσκησης</string>
+    <string name="error_name_required">Το όνομα είναι υποχρεωτικό</string>
+    <string name="error_mg_required">Η μυϊκή ομάδα είναι υποχρεωτική</string>
+    <string name="error_instr_required">Οι οδηγίες είναι υποχρεωτικές</string>
+</resources>

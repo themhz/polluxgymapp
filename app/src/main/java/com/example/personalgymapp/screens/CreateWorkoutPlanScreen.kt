@@ -181,6 +181,7 @@ fun AddExerciseToPlanDialog(
     var searchQuery by remember { mutableStateOf("") }
     var selectedEx by remember { mutableStateOf<Exercise?>(null) }
     var exerciseType by remember { mutableStateOf("REPS") }
+    var timerType by remember { mutableStateOf("COUNTDOWN") }
     var sets by remember { mutableStateOf("3") }
     var reps by remember { mutableStateOf("10") }
     var duration by remember { mutableStateOf("60") }
@@ -249,6 +250,24 @@ fun AddExerciseToPlanDialog(
                     )
                 }
 
+                if (exerciseType == "TIME") {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        FilterChip(
+                            selected = timerType == "COUNTDOWN",
+                            onClick = { timerType = "COUNTDOWN" },
+                            label = { Text("Countdown") },
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        FilterChip(
+                            selected = timerType == "COUNTUP",
+                            onClick = { timerType = "COUNTUP" },
+                            label = { Text("Count-up") },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = sets,
@@ -300,7 +319,8 @@ fun AddExerciseToPlanDialog(
                                 reps = r,
                                 restSeconds = res,
                                 exerciseType = exerciseType,
-                                targetDurationSeconds = d
+                                targetDurationSeconds = d,
+                                timerType = timerType
                             )
                         )
                     }

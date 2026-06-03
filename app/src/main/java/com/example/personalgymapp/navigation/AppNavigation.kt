@@ -12,13 +12,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.personalgymapp.data.*
 import com.example.personalgymapp.screens.*
 import com.example.personalgymapp.viewmodel.ClientViewModel
+import com.example.personalgymapp.viewmodel.SettingsViewModel
 
 @Composable
 fun AppNavigation(clientViewModel: ClientViewModel) {
     val navController = rememberNavController()
+    val settingsViewModel: SettingsViewModel = viewModel()
+    val settings by settingsViewModel.settings.collectAsState()
+    
     val clients by clientViewModel.clients.collectAsState()
     val exercisesList = remember { mutableStateListOf(*mockExercises.toTypedArray()) }
     val workoutPlansList = remember { mutableStateListOf(*mockWorkoutPlans.toTypedArray()) }
@@ -68,7 +73,14 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 onCalendarClick = { navController.navigate("calendar") },
                 onSensorsClick = { navController.navigate("sensors") },
                 onGarminClick = { navController.navigate("garminSettings") },
-                onSubscriptionsClick = { navController.navigate("subscriptions") }
+                onSubscriptionsClick = { navController.navigate("subscriptions") },
+                onSettingsClick = { navController.navigate("settings") }
+            )
+        }
+        composable("settings") {
+            SettingsScreen(
+                viewModel = settingsViewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
         composable("subscriptions") {
@@ -346,6 +358,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         composable("calendar") {
             CalendarScreen(
                 trainingSessions = trainingSessionsList,
+                workoutPlans = workoutPlansList,
                 onTrainingSessionClick = { sessionId ->
                     navController.navigate("trainingSessionDetails/$sessionId")
                 },
@@ -363,6 +376,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             TrainingSessionDetailsScreen(
                 trainingSession = session,
                 workoutPlan = plan,
+                availableWorkoutPlans = workoutPlansList,
                 onWorkoutPlanClick = { planId ->
                     navController.navigate("workoutPlanDetails/$planId")
                 },
@@ -371,6 +385,12 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 },
                 onStartWorkoutClick = { id ->
                     navController.navigate("activeWorkout/$id")
+                },
+                onUpdateSession = { updatedSession ->
+                    val index = trainingSessionsList.indexOfFirst { it.id == sessionId }
+                    if (index != -1) {
+                        trainingSessionsList[index] = updatedSession
+                    }
                 },
                 onBackClick = { navController.popBackStack() }
             )

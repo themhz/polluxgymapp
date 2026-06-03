@@ -1,7 +1,7 @@
 package com.example.personalgymapp
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +13,7 @@ import com.example.personalgymapp.ui.theme.PersonalGymAppTheme
 import com.example.personalgymapp.viewmodel.ClientViewModel
 import com.example.personalgymapp.viewmodel.ClientViewModelFactory
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
