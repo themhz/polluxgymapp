@@ -1,14 +1,18 @@
 package com.example.personalgymapp.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.personalgymapp.model.Exercise
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,6 +29,22 @@ fun AddExerciseScreen(
     var instructions by remember { mutableStateOf("") }
     var focusArea by remember { mutableStateOf("Upper Body") }
     var trainingType by remember { mutableStateOf("Resistance") }
+    var imageResName by remember { mutableStateOf("") }
+    var videoResName by remember { mutableStateOf("") }
+    var selectedImageUri by remember { mutableStateOf<String?>(null) }
+    var selectedVideoUri by remember { mutableStateOf<String?>(null) }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        selectedImageUri = uri?.toString()
+    }
+
+    val videoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        selectedVideoUri = uri?.toString()
+    }
 
     var nameError by remember { mutableStateOf<String?>(null) }
     var muscleGroupError by remember { mutableStateOf<String?>(null) }
@@ -207,6 +227,78 @@ fun AddExerciseScreen(
                 }
             }
 
+            OutlinedTextField(
+                value = imageResName,
+                onValueChange = { imageResName = it },
+                label = { Text("Image Resource Name (Optional)") },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("e.g. squats") }
+            )
+
+            // Image Picker Button
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "External Image", style = MaterialTheme.typography.labelLarge)
+                    Spacer(Modifier.height(8.dp))
+                    if (selectedImageUri != null) {
+                        AsyncImage(
+                            model = selectedImageUri,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .padding(bottom = 8.dp)
+                        )
+                    }
+                    Button(
+                        onClick = { imagePickerLauncher.launch("image/*") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.CloudUpload, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(if (selectedImageUri == null) "Select Image from Device" else "Change Image")
+                    }
+                }
+            }
+
+            OutlinedTextField(
+                value = videoResName,
+                onValueChange = { videoResName = it },
+                label = { Text("Video Resource Name (Optional)") },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("e.g. running") }
+            )
+
+            // Video Picker Button
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "External Video", style = MaterialTheme.typography.labelLarge)
+                    Spacer(Modifier.height(8.dp))
+                    if (selectedVideoUri != null) {
+                        Text(
+                            text = "Video selected: ${selectedVideoUri!!.takeLast(30)}...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+                    Button(
+                        onClick = { videoPickerLauncher.launch("video/*") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.CloudUpload, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(if (selectedVideoUri == null) "Select Video from Device" else "Change Video")
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
@@ -234,7 +326,11 @@ fun AddExerciseScreen(
                             difficulty = difficulty,
                             instructions = instructions,
                             focusArea = focusArea,
-                            trainingType = trainingType
+                            trainingType = trainingType,
+                            imageResName = imageResName.ifBlank { null },
+                            videoResName = videoResName.ifBlank { null },
+                            imageUri = selectedImageUri,
+                            videoUri = selectedVideoUri
                         )
                         onSaveExercise(newExercise)
                     }

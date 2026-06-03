@@ -7,8 +7,6 @@ val mockWorkoutPlans = listOf(
     WorkoutPlan(
         id = 1,
         name = "Full Body Beginner",
-        clientId = 1,
-        clientName = "John Doe",
         notes = "Focus on form and consistent tempo.",
         exercises = listOf(
             WorkoutExercise(1, "Bench Press", 3, 10, 60, "REPS", null),
@@ -20,8 +18,6 @@ val mockWorkoutPlans = listOf(
     WorkoutPlan(
         id = 2,
         name = "Upper Body Power",
-        clientId = 2,
-        clientName = "Jane Smith",
         notes = "Heavy weights, focus on explosive concentric phase.",
         exercises = listOf(
             WorkoutExercise(1, "Bench Press", 4, 6, 120, "REPS", null),
@@ -34,8 +30,6 @@ val mockWorkoutPlans = listOf(
     WorkoutPlan(
         id = 3,
         name = "High Intensity Cardio",
-        clientId = 6,
-        clientName = "Themis",
         notes = "Focus on steady jumping rhythm.",
         exercises = listOf(
             WorkoutExercise(14, "Jumping Rope", 3, 0, 60, "TIME", 180)

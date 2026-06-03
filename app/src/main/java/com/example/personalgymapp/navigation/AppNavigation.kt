@@ -33,7 +33,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
 
     NavHost(
         navController = navController,
-        startDestination = "login",
+        startDestination = "home",
     ) {
         composable("login") {
             LoginScreen(
@@ -144,10 +144,8 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             ClientDetailsScreen(
                 client = client,
                 subscriptions = subscriptions,
-                workoutPlans = workoutPlansList,
                 trainingSessions = trainingSessionsList,
                 onEditClick = { id -> navController.navigate("editClient/$id") },
-                onWorkoutPlanClick = { planId -> navController.navigate("workoutPlanDetails/$planId") },
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -188,6 +186,32 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 onExerciseClick = { exerciseId ->
                     navController.navigate("editWorkoutExercise/${planId}/$exerciseId")
                 },
+                onEditClick = { id -> navController.navigate("editWorkoutPlan/$id") },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "editWorkoutPlan/{workoutPlanId}",
+            arguments = listOf(navArgument("workoutPlanId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val planId = backStackEntry.arguments?.getInt("workoutPlanId") ?: -1
+            val plan = workoutPlansList.find { it.id == planId }
+            EditWorkoutPlanScreen(
+                workoutPlan = plan,
+                availableExercises = exercisesList,
+                onSaveWorkoutPlan = { updatedPlan ->
+                    val index = workoutPlansList.indexOfFirst { it.id == planId }
+                    if (index != -1) {
+                        workoutPlansList[index] = updatedPlan
+                    }
+                    navController.popBackStack()
+                },
+                onDeleteWorkoutPlan = { planToDelete ->
+                    workoutPlansList.removeIf { it.id == planToDelete.id }
+                    navController.navigate("workoutPlans") {
+                        popUpTo("workoutPlans") { inclusive = true }
+                    }
+                },
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -223,7 +247,6 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         }
         composable("createWorkoutPlan") {
             CreateWorkoutPlanScreen(
-                clients = clients,
                 exercises = exercisesList,
                 onSaveWorkoutPlan = { newPlan ->
                     val nextId = (workoutPlansList.maxOfOrNull { it.id } ?: 0) + 1

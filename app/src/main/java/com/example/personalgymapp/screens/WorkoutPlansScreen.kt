@@ -144,14 +144,9 @@ fun WorkoutPlanCard(workoutPlan: WorkoutPlan, onClick: () -> Unit) {
                 )
             }
             Text(
-                text = "Client: ${workoutPlan.clientName}",
+                text = "${workoutPlan.exercises.size} Exercises",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.secondary
-            )
-            Text(
-                text = "${workoutPlan.exercises.size} Exercises",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.tertiary
             )
             if (workoutPlan.notes.isNotBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))

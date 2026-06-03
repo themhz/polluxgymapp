@@ -8,5 +8,9 @@ data class Exercise(
     val difficulty: String,
     val instructions: String,
     val focusArea: String = "Upper Body", // Full Body, Upper Body, Lower Body
-    val trainingType: String = "Resistance" // Resistance, Cardio, Mobility
+    val trainingType: String = "Resistance", // Resistance, Cardio, Mobility
+    val imageResName: String? = null,
+    val videoResName: String? = null,
+    val imageUri: String? = null,
+    val videoUri: String? = null
 )

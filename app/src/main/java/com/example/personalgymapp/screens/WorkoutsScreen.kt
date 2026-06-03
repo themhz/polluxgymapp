@@ -1,14 +1,17 @@
 package com.example.personalgymapp.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.AccessibilityNew
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -18,8 +21,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.example.personalgymapp.R
 import com.example.personalgymapp.components.AddActionFab
 import com.example.personalgymapp.model.Exercise
 
@@ -225,6 +234,19 @@ fun WorkoutsScreen(
 
 @Composable
 fun ExerciseCard(exercise: Exercise, onClick: () -> Unit) {
+    val context = LocalContext.current
+    
+    // Determine the image model for Coil
+    val imageModel = remember(exercise.imageResName, exercise.imageUri) {
+        if (exercise.imageUri != null) {
+            exercise.imageUri
+        } else if (exercise.imageResName != null) {
+            context.resources.getIdentifier(exercise.imageResName, "drawable", context.packageName).let {
+                if (it != 0) it else null
+            }
+        } else null
+    }
+
     val focusIcon = when (exercise.focusArea) {
         "Full Body" -> Icons.Default.AccessibilityNew
         "Upper Body" -> Icons.Default.SportsHandball
@@ -252,27 +274,40 @@ fun ExerciseCard(exercise: Exercise, onClick: () -> Unit) {
     ) {
         Row(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(12.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.width(40.dp)
-            ) {
-                Icon(
-                    imageVector = focusIcon,
-                    contentDescription = exercise.focusArea,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.primary
+            // Exercise Image Thumbnail
+            if (imageModel != null) {
+                AsyncImage(
+                    model = imageModel,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Icon(
-                    imageVector = typeIcon,
-                    contentDescription = exercise.trainingType,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.secondary
-                )
+            } else {
+                // Fallback icons if no image
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.width(80.dp)
+                ) {
+                    Icon(
+                        imageVector = focusIcon,
+                        contentDescription = exercise.focusArea,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Icon(
+                        imageVector = typeIcon,
+                        contentDescription = exercise.trainingType,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.width(16.dp))

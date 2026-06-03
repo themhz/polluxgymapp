@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ import com.example.personalgymapp.model.WorkoutPlan
 fun WorkoutPlanDetailsScreen(
     workoutPlan: WorkoutPlan?,
     onExerciseClick: (Int) -> Unit,
+    onEditClick: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
     Scaffold(
@@ -28,6 +30,13 @@ fun WorkoutPlanDetailsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (workoutPlan != null) {
+                        IconButton(onClick = { onEditClick(workoutPlan.id) }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit Plan")
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -57,19 +66,12 @@ fun WorkoutPlanDetailsScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (workoutPlan.notes.isNotBlank()) {
                         Text(
-                            text = "Client: ${workoutPlan.clientName}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.secondary
+                            text = workoutPlan.notes,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        if (workoutPlan.notes.isNotBlank()) {
-                            Text(
-                                text = workoutPlan.notes,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
                     }
                 }
                 

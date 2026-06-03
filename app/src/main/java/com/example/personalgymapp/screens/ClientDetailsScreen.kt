@@ -14,17 +14,14 @@ import androidx.compose.ui.unit.dp
 import com.example.personalgymapp.database.entity.ClientEntity
 import com.example.personalgymapp.model.Subscription
 import com.example.personalgymapp.model.TrainingSession
-import com.example.personalgymapp.model.WorkoutPlan
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientDetailsScreen(
     client: ClientEntity?,
     subscriptions: List<Subscription>,
-    workoutPlans: List<WorkoutPlan>,
     trainingSessions: List<TrainingSession>,
     onEditClick: (Int) -> Unit,
-    onWorkoutPlanClick: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
     Scaffold(
@@ -107,45 +104,6 @@ fun ClientDetailsScreen(
                 }
 
                 HorizontalDivider()
-                
-                Text(
-                    text = "Client Workout Plans",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                
-                val clientPlans = workoutPlans.filter { it.clientId == client.id }
-                
-                if (clientPlans.isEmpty()) {
-                    Text(
-                        text = "No workout plans created for this client.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
-                } else {
-                    clientPlans.forEach { plan ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = { onWorkoutPlanClick(plan.id) },
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            )
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = plan.name,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "${plan.exercises.size} Exercises",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-                    }
-                }
             }
         }
     }

@@ -11,7 +11,8 @@ val mockExercises = listOf(
         difficulty = "Intermediate",
         instructions = "Lie on your back on a flat bench. Grip the barbell with hands slightly wider than shoulder-width. Lower the bar to your chest and press it back up.",
         focusArea = "Upper Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "bench_press"
     ),
     Exercise(
         id = 2,
@@ -21,7 +22,8 @@ val mockExercises = listOf(
         difficulty = "Beginner",
         instructions = "Start in a plank position. Lower your body until your chest nearly touches the floor. Push back up to the starting position.",
         focusArea = "Upper Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "push_ups"
     ),
     Exercise(
         id = 3,
@@ -31,7 +33,8 @@ val mockExercises = listOf(
         difficulty = "Advanced",
         instructions = "Hang from a bar with palms facing away. Pull your body up until your chin is over the bar. Lower back down with control.",
         focusArea = "Upper Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "pull_ups"
     ),
     Exercise(
         id = 4,
@@ -41,7 +44,8 @@ val mockExercises = listOf(
         difficulty = "Intermediate",
         instructions = "Bend at the hips with a flat back. Pull the barbell toward your lower ribs. Lower the bar back down.",
         focusArea = "Upper Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "bent_over_row"
     ),
     Exercise(
         id = 5,
@@ -51,7 +55,8 @@ val mockExercises = listOf(
         difficulty = "Intermediate",
         instructions = "Place the barbell across your upper back. Lower your hips until thighs are parallel to the floor. Stand back up.",
         focusArea = "Lower Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "squats"
     ),
     Exercise(
         id = 6,
@@ -61,7 +66,8 @@ val mockExercises = listOf(
         difficulty = "Beginner",
         instructions = "Step forward with one leg and lower your hips until both knees are bent at a 90-degree angle. Push back to start.",
         focusArea = "Lower Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "lunges"
     ),
     Exercise(
         id = 7,
@@ -71,7 +77,8 @@ val mockExercises = listOf(
         difficulty = "Intermediate",
         instructions = "Hold the barbell at shoulder height. Press the bar directly overhead until arms are locked. Lower back to shoulders.",
         focusArea = "Upper Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "overhead_press"
     ),
     Exercise(
         id = 8,
@@ -81,7 +88,8 @@ val mockExercises = listOf(
         difficulty = "Beginner",
         instructions = "Hold dumbbells at your sides. Raise arms out to the sides until they are parallel with the floor. Lower back down.",
         focusArea = "Upper Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "lateral_raises"
     ),
     Exercise(
         id = 9,
@@ -91,7 +99,8 @@ val mockExercises = listOf(
         difficulty = "Beginner",
         instructions = "Hold dumbbells with palms facing forward. Curl the weights toward your shoulders while keeping elbows still. Lower back down.",
         focusArea = "Upper Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "bicep_curls"
     ),
     Exercise(
         id = 10,
@@ -101,7 +110,8 @@ val mockExercises = listOf(
         difficulty = "Intermediate",
         instructions = "Support your weight on parallel bars. Lower your body by bending elbows until they are at 90 degrees. Push back up.",
         focusArea = "Upper Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "tricep_dips"
     ),
     Exercise(
         id = 11,
@@ -111,7 +121,8 @@ val mockExercises = listOf(
         difficulty = "Beginner",
         instructions = "Hold a push-up position but rest on your forearms. Keep your body in a straight line and hold for as long as possible.",
         focusArea = "Full Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "plank"
     ),
     Exercise(
         id = 12,
@@ -121,7 +132,8 @@ val mockExercises = listOf(
         difficulty = "Intermediate",
         instructions = "Sit on the floor with knees bent and feet elevated. Twist your torso from side to side, touching the weight to the floor.",
         focusArea = "Full Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "russian_twists"
     ),
     Exercise(
         id = 13,
@@ -131,7 +143,8 @@ val mockExercises = listOf(
         difficulty = "Beginner",
         instructions = "Lean against a wall and slide down until your knees are at a 90-degree angle. Hold for the target duration.",
         focusArea = "Lower Body",
-        trainingType = "Resistance"
+        trainingType = "Resistance",
+        imageResName = "wall_sit"
     ),
     Exercise(
         id = 14,
@@ -141,7 +154,8 @@ val mockExercises = listOf(
         difficulty = "Beginner",
         instructions = "Hold the handles of the jump rope and swing it over your head. Jump over the rope as it passes under your feet.",
         focusArea = "Full Body",
-        trainingType = "Cardio"
+        trainingType = "Cardio",
+        imageResName = "jumping_rope"
     ),
     Exercise(
         id = 15,
@@ -151,6 +165,31 @@ val mockExercises = listOf(
         difficulty = "Beginner",
         instructions = "On hands and knees, alternate between arching and rounding your back.",
         focusArea = "Full Body",
-        trainingType = "Mobility"
+        trainingType = "Mobility",
+        imageResName = "cat_cow_stretch"
+    ),
+    Exercise(
+        id = 16,
+        name = "Running",
+        muscleGroup = "Cardio",
+        equipment = "None",
+        difficulty = "Beginner",
+        instructions = "Run at a steady pace for the desired duration or distance. Focus on breathing and consistent stride.",
+        focusArea = "Full Body",
+        trainingType = "Cardio",
+        imageResName = "running",
+        videoResName = "running"
+    ),
+    Exercise(
+        id = 17,
+        name = "Circuit Training",
+        muscleGroup = "Cardio",
+        equipment = "Various",
+        difficulty = "Intermediate",
+        instructions = "Perform a series of exercises one after another with minimal rest. This is a cyclic high-intensity workout.",
+        focusArea = "Full Body",
+        trainingType = "Cardio",
+        imageResName = "circuit_training",
+        videoResName = "circuit_training"
     )
 )
