@@ -20,7 +20,6 @@ import com.example.personalgymapp.model.Exercise
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExerciseScreen(
-    nextId: Int,
     onSaveExercise: (Exercise) -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -344,7 +343,7 @@ fun AddExerciseScreen(
 
                     if (isValid) {
                         val newExercise = Exercise(
-                            id = nextId,
+                            id = 0, // Room will generate ID
                             name = name,
                             muscleGroup = muscleGroup,
                             equipment = equipment.ifBlank { "None" },

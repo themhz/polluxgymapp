@@ -24,7 +24,7 @@ fun AddClientScreen(
 ) {
     var name by remember { mutableStateOf("") }
     var goal by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf("") }
+    var birthDate by remember { mutableStateOf<Date?>(null) }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
 
@@ -42,7 +42,7 @@ fun AddClientScreen(
             confirmButton = {
                 TextButton(onClick = {
                     birthDatePickerState.selectedDateMillis?.let {
-                        birthDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(it))
+                        birthDate = Date(it)
                     }
                     showBirthDatePicker = false
                     birthDateError = null
@@ -106,7 +106,7 @@ fun AddClientScreen(
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
-                    value = birthDate,
+                    value = birthDate?.let { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(it) } ?: "",
                     onValueChange = { },
                     label = { Text("Birth Date") },
                     modifier = Modifier.fillMaxWidth(),
@@ -153,7 +153,7 @@ fun AddClientScreen(
                         goalError = "Goal is required"
                         isValid = false
                     }
-                    if (birthDate.isBlank()) {
+                    if (birthDate == null) {
                         birthDateError = "Birth date is required"
                         isValid = false
                     }
@@ -166,7 +166,7 @@ fun AddClientScreen(
                         val newClient = ClientEntity(
                             name = name,
                             goal = goal,
-                            birthDate = birthDate,
+                            birthDate = birthDate!!,
                             phone = phone,
                             email = email,
                             sessionsCompleted = 0,

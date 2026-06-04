@@ -19,6 +19,8 @@ import com.example.personalgymapp.database.entity.ClientEntity
 import com.example.personalgymapp.model.Payment
 import com.example.personalgymapp.model.Subscription
 import com.example.personalgymapp.model.TrainingSession
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,8 +76,9 @@ fun ClientDetailsScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                 DetailItem(label = "Goal", value = client.goal)
-                DetailItem(label = "Birth Date", value = client.birthDate)
+                DetailItem(label = "Birth Date", value = sdf.format(client.birthDate))
                 DetailItem(label = "Phone", value = client.phone.ifBlank { "Not provided" })
                 DetailItem(label = "Email", value = client.email)
                 

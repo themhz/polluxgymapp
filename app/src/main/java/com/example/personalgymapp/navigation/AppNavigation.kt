@@ -3,7 +3,6 @@ package com.example.personalgymapp.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -13,7 +12,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.personalgymapp.data.*
 import com.example.personalgymapp.screens.*
 import com.example.personalgymapp.viewmodel.ClientViewModel
 import com.example.personalgymapp.viewmodel.SettingsViewModel
@@ -22,17 +20,14 @@ import com.example.personalgymapp.viewmodel.SettingsViewModel
 fun AppNavigation(clientViewModel: ClientViewModel) {
     val navController = rememberNavController()
     val settingsViewModel: SettingsViewModel = viewModel()
-    val settings by settingsViewModel.settings.collectAsState()
     
     val clients by clientViewModel.clients.collectAsState()
-    val exercisesList = remember { mutableStateListOf(*mockExercises.toTypedArray()) }
-    val workoutPlansList = remember { mutableStateListOf(*mockWorkoutPlans.toTypedArray()) }
-    val progressEntriesList = remember { mutableStateListOf(*mockProgressEntries.toTypedArray()) }
-    val trainingSessionsList = remember { mutableStateListOf(*mockTrainingSessions.toTypedArray()) }
-    val sessionResultsList = remember { mutableStateListOf(*mockSessionExerciseResults.toTypedArray()) }
+    val exercises by clientViewModel.exercises.collectAsState()
+    val workoutPlans by clientViewModel.workoutPlans.collectAsState()
+    val trainingSessions by clientViewModel.trainingSessions.collectAsState()
     val subscriptions by clientViewModel.subscriptions.collectAsState()
 
-    // Filter states for Exercise Library (hoisted to survive back navigation)
+    // Filter states for Exercise Library
     var exerciseSearchQuery by remember { mutableStateOf("") }
     var exerciseSelectedMuscleGroups by remember { mutableStateOf(setOf<String>()) }
 
@@ -40,31 +35,6 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         navController = navController,
         startDestination = "home",
     ) {
-        composable("login") {
-            LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                }
-            ) {
-                navController.navigate("register")
-            }
-        }
-        composable("register") {
-            RegisterScreen(
-                onRegisterSuccess = {
-                    navController.navigate("home") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                },
-                onSignInClick = {
-                    navController.navigate("login") {
-                        popUpTo("login") { inclusive = true }
-                    }
-                }
-            )
-        }
         composable("home") {
             HomeScreen(
                 onClientsClick = { navController.navigate("clients") },
@@ -97,7 +67,6 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         ) { backStackEntry ->
             val subId = backStackEntry.arguments?.getInt("subscriptionId") ?: -1
             val subscription = subscriptions.find { it.id == subId }
-            
             EditSubscriptionScreen(
                 subscription = subscription,
                 onSaveSubscription = { updatedSub ->
@@ -158,7 +127,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             ClientDetailsScreen(
                 client = client,
                 subscriptions = subscriptions,
-                trainingSessions = trainingSessionsList,
+                trainingSessions = trainingSessions,
                 payments = payments,
                 onAddPaymentClick = { id -> navController.navigate("addPayment/$id") },
                 onEditClick = { id -> navController.navigate("editClient/$id") },
@@ -204,7 +173,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         }
         composable("workoutPlans") {
             WorkoutPlansScreen(
-                workoutPlans = workoutPlansList,
+                workoutPlans = workoutPlans,
                 onWorkoutPlanClick = { planId ->
                     navController.navigate("workoutPlanDetails/$planId")
                 },
@@ -218,7 +187,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             arguments = listOf(navArgument("workoutPlanId") { type = NavType.IntType })
         ) { backStackEntry ->
             val planId = backStackEntry.arguments?.getInt("workoutPlanId") ?: -1
-            val plan = workoutPlansList.find { it.id == planId }
+            val plan = workoutPlans.find { it.id == planId }
             WorkoutPlanDetailsScreen(
                 workoutPlan = plan,
                 onExerciseClick = { exerciseId ->
@@ -233,22 +202,17 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             arguments = listOf(navArgument("workoutPlanId") { type = NavType.IntType })
         ) { backStackEntry ->
             val planId = backStackEntry.arguments?.getInt("workoutPlanId") ?: -1
-            val plan = workoutPlansList.find { it.id == planId }
+            val plan = workoutPlans.find { it.id == planId }
             EditWorkoutPlanScreen(
                 workoutPlan = plan,
-                availableExercises = exercisesList,
+                availableExercises = exercises,
                 onSaveWorkoutPlan = { updatedPlan ->
-                    val index = workoutPlansList.indexOfFirst { it.id == planId }
-                    if (index != -1) {
-                        workoutPlansList[index] = updatedPlan
-                    }
+                    clientViewModel.updateWorkoutPlan(updatedPlan)
                     navController.popBackStack()
                 },
                 onDeleteWorkoutPlan = { planToDelete ->
-                    workoutPlansList.removeIf { it.id == planToDelete.id }
-                    navController.navigate("workoutPlans") {
-                        popUpTo("workoutPlans") { inclusive = true }
-                    }
+                    clientViewModel.deleteWorkoutPlan(planToDelete)
+                    navController.popBackStack()
                 },
                 onBackClick = { navController.popBackStack() }
             )
@@ -262,20 +226,18 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         ) { backStackEntry ->
             val planId = backStackEntry.arguments?.getInt("workoutPlanId") ?: -1
             val exerciseId = backStackEntry.arguments?.getInt("exerciseId") ?: -1
-            val plan = workoutPlansList.find { it.id == planId }
+            val plan = workoutPlans.find { it.id == planId }
             
             EditWorkoutExerciseScreen(
                 workoutPlan = plan,
                 exerciseId = exerciseId,
                 onSave = { updatedExercise ->
-                    val planIndex = workoutPlansList.indexOfFirst { it.id == planId }
-                    if (planIndex != -1) {
-                        val currentPlan = workoutPlansList[planIndex]
-                        val exerciseIndex = currentPlan.exercises.indexOfFirst { it.exerciseId == exerciseId }
-                        if (exerciseIndex != -1) {
-                            val updatedExercises = currentPlan.exercises.toMutableList()
-                            updatedExercises[exerciseIndex] = updatedExercise
-                            workoutPlansList[planIndex] = currentPlan.copy(exercises = updatedExercises)
+                    if (plan != null) {
+                        val updatedExercises = plan.exercises.toMutableList()
+                        val index = updatedExercises.indexOfFirst { it.exerciseId == exerciseId }
+                        if (index != -1) {
+                            updatedExercises[index] = updatedExercise
+                            clientViewModel.updateWorkoutPlan(plan.copy(exercises = updatedExercises))
                         }
                     }
                     navController.popBackStack()
@@ -285,10 +247,9 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         }
         composable("createWorkoutPlan") {
             CreateWorkoutPlanScreen(
-                exercises = exercisesList,
+                exercises = exercises,
                 onSaveWorkoutPlan = { newPlan ->
-                    val nextId = (workoutPlansList.maxOfOrNull { it.id } ?: 0) + 1
-                    workoutPlansList.add(newPlan.copy(id = nextId))
+                    clientViewModel.addWorkoutPlan(newPlan)
                     navController.popBackStack()
                 },
                 onBackClick = { navController.popBackStack() }
@@ -296,7 +257,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         }
         composable("workouts") {
             WorkoutsScreen(
-                exercises = exercisesList,
+                exercises = exercises,
                 searchQuery = exerciseSearchQuery,
                 onSearchQueryChange = { exerciseSearchQuery = it },
                 selectedMuscleGroups = exerciseSelectedMuscleGroups,
@@ -309,11 +270,9 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             )
         }
         composable("addExercise") {
-            val nextId = (exercisesList.maxOfOrNull { it.id } ?: 0) + 1
             AddExerciseScreen(
-                nextId = nextId,
                 onSaveExercise = { newExercise ->
-                    exercisesList.add(newExercise)
+                    clientViewModel.addExercise(newExercise)
                     navController.popBackStack()
                 },
                 onBackClick = { navController.popBackStack() }
@@ -324,7 +283,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             arguments = listOf(navArgument("exerciseId") { type = NavType.IntType })
         ) { backStackEntry ->
             val exerciseId = backStackEntry.arguments?.getInt("exerciseId") ?: -1
-            val exercise = exercisesList.find { it.id == exerciseId }
+            val exercise = exercises.find { it.id == exerciseId }
             ExerciseDetailsScreen(
                 exercise = exercise,
                 onEditClick = { id -> navController.navigate("editExercise/$id") },
@@ -336,55 +295,33 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             arguments = listOf(navArgument("exerciseId") { type = NavType.IntType })
         ) { backStackEntry ->
             val exerciseId = backStackEntry.arguments?.getInt("exerciseId") ?: -1
-            val exercise = exercisesList.find { it.id == exerciseId }
+            val exercise = exercises.find { it.id == exerciseId }
             EditExerciseScreen(
                 exercise = exercise,
                 onSaveExercise = { updatedExercise ->
-                    val index = exercisesList.indexOfFirst { it.id == exerciseId }
-                    if (index != -1) {
-                        exercisesList[index] = updatedExercise
-                    }
+                    clientViewModel.updateExercise(updatedExercise)
+                    navController.popBackStack()
+                },
+                onDeleteExercise = { exToDelete ->
+                    clientViewModel.deleteExercise(exToDelete)
                     navController.popBackStack()
                 },
                 onBackClick = { navController.popBackStack() }
             )
         }
         composable("progress") {
+            // Need to update ProgressScreen to use persistent data if needed
             ProgressScreen(
-                progressEntries = progressEntriesList,
-                onProgressEntryClick = { entryId ->
-                    navController.navigate("progressDetails/$entryId")
-                },
-                onAddProgressEntryClick = { navController.navigate("addProgressEntry") },
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-        composable(
-            route = "progressDetails/{progressEntryId}",
-            arguments = listOf(navArgument("progressEntryId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val entryId = backStackEntry.arguments?.getInt("progressEntryId") ?: -1
-            val entry = progressEntriesList.find { it.id == entryId }
-            ProgressDetailsScreen(
-                progressEntry = entry,
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-        composable("addProgressEntry") {
-            AddProgressEntryScreen(
-                clients = clients,
-                onSaveProgressEntry = { newEntry ->
-                    val nextId = (progressEntriesList.maxOfOrNull { it.id } ?: 0) + 1
-                    progressEntriesList.add(newEntry.copy(id = nextId))
-                    navController.popBackStack()
-                },
+                progressEntries = emptyList(), // Placeholder for now
+                onProgressEntryClick = { },
+                onAddProgressEntryClick = { },
                 onBackClick = { navController.popBackStack() }
             )
         }
         composable("calendar") {
             CalendarScreen(
-                trainingSessions = trainingSessionsList,
-                workoutPlans = workoutPlansList,
+                trainingSessions = trainingSessions,
+                workoutPlans = workoutPlans,
                 onTrainingSessionClick = { sessionId ->
                     navController.navigate("trainingSessionDetails/$sessionId")
                 },
@@ -397,12 +334,12 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             arguments = listOf(navArgument("trainingSessionId") { type = NavType.IntType })
         ) { backStackEntry ->
             val sessionId = backStackEntry.arguments?.getInt("trainingSessionId") ?: -1
-            val session = trainingSessionsList.find { it.id == sessionId }
-            val plan = workoutPlansList.find { it.id == session?.workoutPlanId }
+            val session = trainingSessions.find { it.id == sessionId }
+            val plan = workoutPlans.find { it.id == session?.workoutPlanId }
             TrainingSessionDetailsScreen(
                 trainingSession = session,
                 workoutPlan = plan,
-                availableWorkoutPlans = workoutPlansList,
+                availableWorkoutPlans = workoutPlans,
                 onWorkoutPlanClick = { planId ->
                     navController.navigate("workoutPlanDetails/$planId")
                 },
@@ -413,10 +350,11 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                     navController.navigate("activeWorkout/$id")
                 },
                 onUpdateSession = { updatedSession ->
-                    val index = trainingSessionsList.indexOfFirst { it.id == sessionId }
-                    if (index != -1) {
-                        trainingSessionsList[index] = updatedSession
-                    }
+                    clientViewModel.updateSession(updatedSession)
+                },
+                onDeleteSession = { sessionToDelete ->
+                    clientViewModel.deleteSession(sessionToDelete)
+                    navController.popBackStack()
                 },
                 onBackClick = { navController.popBackStack() }
             )
@@ -426,17 +364,21 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             arguments = listOf(navArgument("trainingSessionId") { type = NavType.IntType })
         ) { backStackEntry ->
             val sessionId = backStackEntry.arguments?.getInt("trainingSessionId") ?: -1
-            val session = trainingSessionsList.find { it.id == sessionId }
-            val plan = workoutPlansList.find { it.id == session?.workoutPlanId }
+            val session = trainingSessions.find { it.id == sessionId }
+            val plan = workoutPlans.find { it.id == session?.workoutPlanId }
             ActiveWorkoutSessionScreen(
                 trainingSession = session,
                 workoutPlan = plan,
                 onFinishWorkout = { results ->
-                    var currentMaxId = sessionResultsList.maxOfOrNull { it.id } ?: 0
-                    results.forEach { result ->
-                        currentMaxId++
-                        sessionResultsList.add(result.copy(id = currentMaxId))
+                    if (session != null) {
+                        clientViewModel.updateSession(session.copy(status = "Completed"))
+                        clients.find { it.id == session.clientId }?.let { client ->
+                            clientViewModel.updateClient(client.copy(
+                                sessionsCompleted = client.sessionsCompleted + 1
+                            ))
+                        }
                     }
+                    results.forEach { clientViewModel.addSessionResult(it) }
                     navController.navigate("sessionResults/$sessionId") {
                         popUpTo("trainingSessionDetails/$sessionId")
                     }
@@ -447,10 +389,9 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         composable("addTrainingSession") {
             AddTrainingSessionScreen(
                 clients = clients,
-                workoutPlans = workoutPlansList,
+                workoutPlans = workoutPlans,
                 onSaveTrainingSession = { newSession ->
-                    val nextId = (trainingSessionsList.maxOfOrNull { it.id } ?: 0) + 1
-                    trainingSessionsList.add(newSession.copy(id = nextId))
+                    clientViewModel.addSession(newSession)
                     navController.popBackStack()
                 },
                 onBackClick = { navController.popBackStack() }
@@ -461,9 +402,9 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             arguments = listOf(navArgument("trainingSessionId") { type = NavType.IntType })
         ) { backStackEntry ->
             val sessionId = backStackEntry.arguments?.getInt("trainingSessionId") ?: -1
-            val session = trainingSessionsList.find { it.id == sessionId }
-            val plan = workoutPlansList.find { it.id == session?.workoutPlanId }
-            val results = sessionResultsList.filter { it.trainingSessionId == sessionId }
+            val session = trainingSessions.find { it.id == sessionId }
+            val plan = workoutPlans.find { it.id == session?.workoutPlanId }
+            val results by clientViewModel.getResultsForSession(sessionId).collectAsState(initial = emptyList())
             SessionResultsScreen(
                 trainingSession = session,
                 workoutPlan = plan,
@@ -479,13 +420,12 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             arguments = listOf(navArgument("trainingSessionId") { type = NavType.IntType })
         ) { backStackEntry ->
             val sessionId = backStackEntry.arguments?.getInt("trainingSessionId") ?: -1
-            val session = trainingSessionsList.find { it.id == sessionId }
+            val session = trainingSessions.find { it.id == sessionId }
             AddSessionExerciseResultScreen(
                 trainingSession = session,
-                exercises = exercisesList,
+                exercises = exercises,
                 onSaveExerciseResult = { newResult ->
-                    val nextId = (sessionResultsList.maxOfOrNull { it.id } ?: 0) + 1
-                    sessionResultsList.add(newResult.copy(id = nextId))
+                    clientViewModel.addSessionResult(newResult)
                     navController.popBackStack()
                 },
                 onBackClick = { navController.popBackStack() }

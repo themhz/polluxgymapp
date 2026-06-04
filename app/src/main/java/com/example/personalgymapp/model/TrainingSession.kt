@@ -1,7 +1,12 @@
 package com.example.personalgymapp.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "training_sessions")
 data class TrainingSession(
-    val id: Int,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val clientId: Int,
     val clientName: String,
     val date: String,

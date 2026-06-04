@@ -2,13 +2,8 @@ package com.example.personalgymapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.personalgymapp.data.mockClients
-import com.example.personalgymapp.data.mockSubscriptions
-import com.example.personalgymapp.database.entity.ClientEntity
-import com.example.personalgymapp.database.entity.PaymentEntity
-import com.example.personalgymapp.database.entity.SubscriptionEntity
-import com.example.personalgymapp.model.Payment
-import com.example.personalgymapp.model.Subscription
+import com.example.personalgymapp.database.entity.*
+import com.example.personalgymapp.model.*
 import com.example.personalgymapp.repository.ClientRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -30,6 +25,27 @@ class ClientViewModel(private val repository: ClientRepository) : ViewModel() {
             initialValue = emptyList()
         )
 
+    val exercises: StateFlow<List<Exercise>> = repository.allExercises
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    val workoutPlans: StateFlow<List<WorkoutPlan>> = repository.allWorkoutPlans
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
+    val trainingSessions: StateFlow<List<TrainingSession>> = repository.allSessions
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     fun getPaymentsForClient(clientId: Int): Flow<List<Payment>> =
         repository.getPaymentsForClient(clientId).map { entities ->
             entities.map { it.toDomainModel() }
@@ -39,7 +55,7 @@ class ClientViewModel(private val repository: ClientRepository) : ViewModel() {
         viewModelScope.launch {
             repository.insertPayment(PaymentEntity.fromDomainModel(payment))
             
-            // Optionally update totalPaid in subscription
+            // Update totalPaid in subscription
             val clientSubs = repository.getSubscriptionsForClient(payment.clientId).first()
             val activeSub = clientSubs.find { it.status != "Paid" } ?: clientSubs.lastOrNull()
             
@@ -54,22 +70,28 @@ class ClientViewModel(private val repository: ClientRepository) : ViewModel() {
     }
 
     fun seedDatabaseIfEmpty() {
-        viewModelScope.launch {
-            val currentClients = repository.allClients.first()
-            if (currentClients.isEmpty()) {
-                mockClients.forEach {
-                    repository.insertClient(it)
-                }
-            }
-            
-            val currentSubs = repository.allSubscriptions.first()
-            if (currentSubs.isEmpty()) {
-                mockSubscriptions.forEach {
-                    repository.insertSubscription(SubscriptionEntity.fromDomainModel(it))
-                }
-            }
-        }
+        // Mock data seeding removed
     }
+
+    // Exercise Methods
+    fun addExercise(exercise: Exercise) = viewModelScope.launch { repository.insertExercise(exercise) }
+    fun updateExercise(exercise: Exercise) = viewModelScope.launch { repository.updateExercise(exercise) }
+    fun deleteExercise(exercise: Exercise) = viewModelScope.launch { repository.deleteExercise(exercise) }
+
+    // Workout Plan Methods
+    fun addWorkoutPlan(plan: WorkoutPlan) = viewModelScope.launch { repository.insertWorkoutPlan(plan) }
+    fun updateWorkoutPlan(plan: WorkoutPlan) = viewModelScope.launch { repository.updateWorkoutPlan(plan) }
+    fun deleteWorkoutPlan(plan: WorkoutPlan) = viewModelScope.launch { repository.deleteWorkoutPlan(plan) }
+
+    // Training Session Methods
+    fun addSession(session: TrainingSession) = viewModelScope.launch { repository.insertSession(session) }
+    fun updateSession(session: TrainingSession) = viewModelScope.launch { repository.updateSession(session) }
+    fun deleteSession(session: TrainingSession) = viewModelScope.launch { repository.deleteSession(session) }
+    fun getSessionsForClient(clientId: Int) = repository.getSessionsForClient(clientId)
+
+    // Session Result Methods
+    fun addSessionResult(result: SessionExerciseResult) = viewModelScope.launch { repository.insertSessionResult(result) }
+    fun getResultsForSession(sessionId: Int) = repository.getResultsForSession(sessionId)
 
     fun addSubscription(subscription: Subscription) {
         viewModelScope.launch {

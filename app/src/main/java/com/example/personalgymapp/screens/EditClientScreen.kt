@@ -51,7 +51,7 @@ fun EditClientScreen(
 
     var name by remember { mutableStateOf(client.name) }
     var goal by remember { mutableStateOf(client.goal) }
-    var birthDate by remember { mutableStateOf(client.birthDate) }
+    var birthDate by remember { mutableStateOf<Date?>(client.birthDate) }
     var phone by remember { mutableStateOf(client.phone) }
     var email by remember { mutableStateOf(client.email) }
     var nextSession by remember { mutableStateOf(client.nextSession) }
@@ -99,7 +99,7 @@ fun EditClientScreen(
             confirmButton = {
                 TextButton(onClick = {
                     birthDatePickerState.selectedDateMillis?.let {
-                        birthDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(it))
+                        birthDate = Date(it)
                     }
                     showBirthDatePicker = false
                     birthDateError = null
@@ -195,7 +195,7 @@ fun EditClientScreen(
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
-                    value = birthDate,
+                    value = birthDate?.let { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(it) } ?: "",
                     onValueChange = { },
                     label = { Text("Birth Date") },
                     modifier = Modifier.fillMaxWidth(),
@@ -260,7 +260,7 @@ fun EditClientScreen(
                         goalError = "Goal is required"
                         isValid = false
                     }
-                    if (birthDate.isBlank()) {
+                    if (birthDate == null) {
                         birthDateError = "Birth date is required"
                         isValid = false
                     }
@@ -274,7 +274,7 @@ fun EditClientScreen(
                             client.copy(
                                 name = name,
                                 goal = goal,
-                                birthDate = birthDate,
+                                birthDate = birthDate!!,
                                 phone = phone,
                                 email = email,
                                 nextSession = nextSession

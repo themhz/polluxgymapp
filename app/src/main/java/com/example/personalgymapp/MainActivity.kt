@@ -18,7 +18,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val database = AppDatabase.getDatabase(this)
-        val repository = ClientRepository(database.clientDao(), database.subscriptionDao(), database.paymentDao())
+        val repository = ClientRepository(
+            database.clientDao(),
+            database.subscriptionDao(),
+            database.paymentDao(),
+            database.exerciseDao(),
+            database.workoutPlanDao(),
+            database.trainingSessionDao(),
+            database.sessionResultDao()
+        )
         val viewModel = ViewModelProvider(this, ClientViewModelFactory(repository))[ClientViewModel::class.java]
         
         viewModel.seedDatabaseIfEmpty()

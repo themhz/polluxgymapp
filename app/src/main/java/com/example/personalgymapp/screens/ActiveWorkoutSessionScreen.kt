@@ -1,5 +1,7 @@
 package com.example.personalgymapp.screens
 
+import android.media.AudioManager
+import android.media.ToneGenerator
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -72,6 +74,9 @@ fun ActiveWorkoutSessionScreen(
     var isResting by remember { mutableStateOf(false) }
     var timerSeconds by remember { mutableStateOf(0) }
     var isTimerRunning by remember { mutableStateOf(false) }
+
+    // Sound Generator for timer completion
+    val toneGenerator = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 100) }
 
     // Helper to add a set result
     val completeSet = {
@@ -152,6 +157,8 @@ fun ActiveWorkoutSessionScreen(
                         isTimerRunning = false
                     }
                 } else if (currentExercise.exerciseType == "TIME") {
+                    // Play a beep sound when the exercise time finishes
+                    toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 500)
                     completeSet()
                 }
             }

@@ -380,7 +380,7 @@ fun ExerciseCard(exercise: Exercise, onClick: () -> Unit, muscleGroupLabel: Stri
 fun WorkoutsScreenPreview() {
     com.example.personalgymapp.ui.theme.PersonalGymAppTheme {
         WorkoutsScreen(
-            exercises = com.example.personalgymapp.data.mockExercises,
+            exercises = emptyList(),
             searchQuery = "",
             onSearchQueryChange = {},
             selectedMuscleGroups = emptySet(),

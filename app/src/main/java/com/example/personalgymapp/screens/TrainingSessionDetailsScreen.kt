@@ -29,9 +29,11 @@ fun TrainingSessionDetailsScreen(
     onViewSessionResultsClick: (Int) -> Unit,
     onStartWorkoutClick: (Int) -> Unit,
     onUpdateSession: (TrainingSession) -> Unit,
+    onDeleteSession: (TrainingSession) -> Unit,
     onBackClick: () -> Unit
 ) {
     var showPlanSelectionDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -40,6 +42,13 @@ fun TrainingSessionDetailsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (trainingSession != null) {
+                        IconButton(onClick = { showDeleteDialog = true }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Delete Session", tint = MaterialTheme.colorScheme.error)
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -195,6 +204,30 @@ fun TrainingSessionDetailsScreen(
                 }
             }
         }
+    }
+
+    if (showDeleteDialog && trainingSession != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Session") },
+            text = { Text("Are you sure you want to delete this session for ${trainingSession.clientName}?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDeleteSession(trainingSession)
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     if (showPlanSelectionDialog && trainingSession != null) {
