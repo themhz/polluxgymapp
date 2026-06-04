@@ -3,16 +3,17 @@ package com.example.personalgymapp.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.R
 import com.example.personalgymapp.database.entity.ClientEntity
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -23,11 +24,27 @@ import java.util.Locale
 fun EditClientScreen(
     client: ClientEntity?,
     onSaveClient: (ClientEntity) -> Unit,
+    onDeleteClient: (ClientEntity) -> Unit,
     onBackClick: () -> Unit,
 ) {
+    val noMatchingClientsText = stringResource(R.string.no_matching_clients)
+    val deleteClientText = stringResource(R.string.delete_client)
+    val deleteClientConfirmationText = stringResource(R.string.delete_client_confirmation)
+    val deleteText = stringResource(R.string.delete)
+    val cancelText = stringResource(R.string.cancel)
+    val okText = stringResource(R.string.ok)
+    val editClientText = stringResource(R.string.edit_client)
+    val nameLabel = stringResource(R.string.client)
+    val nextSessionLabel = stringResource(R.string.next_session).substringBefore(":")
+    val saveClientText = stringResource(R.string.save_exercise)
+        .replace("Άσκηση", "Πελάτη")
+        .replace("Exercise", "Client")
+    val backContentDescription = stringResource(R.string.status_cancelled).substringBefore(" ")
+    val nameRequiredError = stringResource(R.string.error_name_required)
+
     if (client == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-            Text("Client not found")
+            Text(noMatchingClientsText)
         }
         return
     }
@@ -50,6 +67,32 @@ fun EditClientScreen(
     val sessionDatePickerState = rememberDatePickerState()
     var showSessionDatePicker by remember { mutableStateOf(false) }
 
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(deleteClientText) },
+            text = { Text(deleteClientConfirmationText) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        onDeleteClient(client)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(deleteText)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(cancelText)
+                }
+            }
+        )
+    }
+
     if (showBirthDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showBirthDatePicker = false },
@@ -61,12 +104,12 @@ fun EditClientScreen(
                     showBirthDatePicker = false
                     birthDateError = null
                 }) {
-                    Text("OK")
+                    Text(okText)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showBirthDatePicker = false }) {
-                    Text("Cancel")
+                    Text(cancelText)
                 }
             }
         ) {
@@ -84,12 +127,12 @@ fun EditClientScreen(
                     }
                     showSessionDatePicker = false
                 }) {
-                    Text("OK")
+                    Text(okText)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showSessionDatePicker = false }) {
-                    Text("Cancel")
+                    Text(cancelText)
                 }
             }
         ) {
@@ -100,10 +143,19 @@ fun EditClientScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Client") },
+                title = { Text(editClientText) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = backContentDescription)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = deleteClientText,
+                            tint = MaterialTheme.colorScheme.error
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -126,7 +178,7 @@ fun EditClientScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it; nameError = null },
-                label = { Text("Name") },
+                label = { Text(nameLabel) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = nameError != null,
                 supportingText = { nameError?.let { Text(it) } }
@@ -181,7 +233,7 @@ fun EditClientScreen(
                 OutlinedTextField(
                     value = nextSession,
                     onValueChange = { },
-                    label = { Text("Next Session") },
+                    label = { Text(nextSessionLabel) },
                     modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
                     trailingIcon = {
@@ -201,7 +253,7 @@ fun EditClientScreen(
                 onClick = {
                     var isValid = true
                     if (name.isBlank()) {
-                        nameError = "Name is required"
+                        nameError = nameRequiredError
                         isValid = false
                     }
                     if (goal.isBlank()) {
@@ -232,7 +284,7 @@ fun EditClientScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Update Client")
+                Text(saveClientText)
             }
         }
     }

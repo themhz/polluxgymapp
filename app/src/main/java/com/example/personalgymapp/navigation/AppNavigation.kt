@@ -153,11 +153,31 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         ) { backStackEntry ->
             val clientId = backStackEntry.arguments?.getInt("clientId") ?: -1
             val client = clients.find { it.id == clientId }
+            val payments by clientViewModel.getPaymentsForClient(clientId).collectAsState(initial = emptyList())
+            
             ClientDetailsScreen(
                 client = client,
                 subscriptions = subscriptions,
                 trainingSessions = trainingSessionsList,
+                payments = payments,
+                onAddPaymentClick = { id -> navController.navigate("addPayment/$id") },
                 onEditClick = { id -> navController.navigate("editClient/$id") },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "addPayment/{clientId}",
+            arguments = listOf(navArgument("clientId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val clientId = backStackEntry.arguments?.getInt("clientId") ?: -1
+            val client = clients.find { it.id == clientId }
+            AddPaymentScreen(
+                clientId = clientId,
+                clientName = client?.name ?: "Unknown",
+                onSavePayment = { payment ->
+                    clientViewModel.addPayment(payment)
+                    navController.popBackStack()
+                },
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -172,6 +192,12 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 onSaveClient = { updatedClient ->
                     clientViewModel.updateClient(updatedClient)
                     navController.popBackStack()
+                },
+                onDeleteClient = { clientToDelete ->
+                    clientViewModel.deleteClient(clientToDelete)
+                    navController.navigate("clients") {
+                        popUpTo("clients") { inclusive = true }
+                    }
                 },
                 onBackClick = { navController.popBackStack() }
             )

@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.personalgymapp.data.mockClients
 import com.example.personalgymapp.data.mockSubscriptions
 import com.example.personalgymapp.database.entity.ClientEntity
+import com.example.personalgymapp.database.entity.PaymentEntity
 import com.example.personalgymapp.database.entity.SubscriptionEntity
+import com.example.personalgymapp.model.Payment
 import com.example.personalgymapp.model.Subscription
 import com.example.personalgymapp.repository.ClientRepository
 import kotlinx.coroutines.flow.*
@@ -27,6 +29,29 @@ class ClientViewModel(private val repository: ClientRepository) : ViewModel() {
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    fun getPaymentsForClient(clientId: Int): Flow<List<Payment>> =
+        repository.getPaymentsForClient(clientId).map { entities ->
+            entities.map { it.toDomainModel() }
+        }
+
+    fun addPayment(payment: Payment) {
+        viewModelScope.launch {
+            repository.insertPayment(PaymentEntity.fromDomainModel(payment))
+            
+            // Optionally update totalPaid in subscription
+            val clientSubs = repository.getSubscriptionsForClient(payment.clientId).first()
+            val activeSub = clientSubs.find { it.status != "Paid" } ?: clientSubs.lastOrNull()
+            
+            if (activeSub != null) {
+                val updatedSub = activeSub.copy(
+                    totalPaid = activeSub.totalPaid + payment.amount,
+                    status = if (activeSub.totalPaid + payment.amount >= activeSub.price) "Paid" else activeSub.status
+                )
+                repository.updateSubscription(updatedSub)
+            }
+        }
+    }
 
     fun seedDatabaseIfEmpty() {
         viewModelScope.launch {
