@@ -1,5 +1,6 @@
 package com.example.personalgymapp.navigation
 
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -11,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.personalgymapp.screens.*
 import com.example.personalgymapp.viewmodel.ClientViewModel
@@ -371,7 +373,10 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         }
         composable(
             route = "trainingSessionDetails/{trainingSessionId}",
-            arguments = listOf(navArgument("trainingSessionId") { type = NavType.IntType })
+            arguments = listOf(navArgument("trainingSessionId") { type = NavType.IntType }),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "pgymapp://session/{trainingSessionId}" }
+            )
         ) { backStackEntry ->
             val sessionId = backStackEntry.arguments?.getInt("trainingSessionId") ?: -1
             val session = trainingSessions.find { it.id == sessionId }

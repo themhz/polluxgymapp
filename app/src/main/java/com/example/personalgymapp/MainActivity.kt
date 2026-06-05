@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
             database.sessionResultDao(),
             database.subscriptionPlanDao()
         )
-        val viewModel = ViewModelProvider(this, ClientViewModelFactory(repository))[ClientViewModel::class.java]
+        val viewModel = ViewModelProvider(this, ClientViewModelFactory(application, repository))[ClientViewModel::class.java]
         
         viewModel.seedDatabaseIfEmpty()
 

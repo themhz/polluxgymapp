@@ -13,7 +13,7 @@ interface TrainingSessionDao {
     fun getSessionsForClient(clientId: Int): Flow<List<TrainingSession>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSession(session: TrainingSession)
+    suspend fun insertSession(session: TrainingSession): Long
 
     @Update
     suspend fun updateSession(session: TrainingSession)

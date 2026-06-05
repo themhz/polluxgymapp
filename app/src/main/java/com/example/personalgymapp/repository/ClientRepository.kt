@@ -62,7 +62,7 @@ class ClientRepository(
     suspend fun deleteWorkoutPlan(plan: WorkoutPlan) = workoutPlanDao.deleteWorkoutPlan(plan)
 
     // Training Sessions
-    suspend fun insertSession(session: TrainingSession) = trainingSessionDao.insertSession(session)
+    suspend fun insertSession(session: TrainingSession): Long = trainingSessionDao.insertSession(session)
     suspend fun updateSession(session: TrainingSession) = trainingSessionDao.updateSession(session)
     suspend fun deleteSession(session: TrainingSession) = trainingSessionDao.deleteSession(session)
 
