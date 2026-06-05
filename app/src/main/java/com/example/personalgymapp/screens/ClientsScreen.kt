@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.example.personalgymapp.R
 import com.example.personalgymapp.components.AddActionFab
 import com.example.personalgymapp.database.entity.ClientEntity
+import com.example.personalgymapp.database.entity.SubscriptionPlanEntity
 import com.example.personalgymapp.model.Subscription
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,20 +28,21 @@ import com.example.personalgymapp.model.Subscription
 fun ClientsScreen(
     clients: List<ClientEntity>,
     subscriptions: List<Subscription>,
+    subscriptionPlans: List<SubscriptionPlanEntity>,
     onBackClick: () -> Unit,
     onClientClick: (Int) -> Unit,
     onAddClientClick: () -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedPlan by remember { mutableStateOf("All Plans") }
+    var selectedPlanFilter by remember { mutableStateOf("All Plans") }
     var expandedPlanFilter by remember { mutableStateOf(false) }
 
-    val allPlans = listOf("All Plans") + subscriptions.map { it.planName }.distinct()
+    val allPlanNames = listOf("All Plans") + subscriptionPlans.map { it.name }.distinct()
 
     val filteredClients = clients.filter { client ->
         val matchesSearch = client.name.contains(searchQuery, ignoreCase = true)
-        val clientSubscription = subscriptions.find { it.clientId == client.id }
-        val matchesPlan = selectedPlan == "All Plans" || clientSubscription?.planName == selectedPlan
+        val planName = subscriptionPlans.find { it.id == client.subscriptionPlanId }?.name ?: "No Plan"
+        val matchesPlan = selectedPlanFilter == "All Plans" || planName == selectedPlanFilter
         matchesSearch && matchesPlan
     }
 
@@ -107,7 +109,7 @@ fun ClientsScreen(
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
-                    value = selectedPlan,
+                    value = selectedPlanFilter,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.filter_by_plan)) },
@@ -126,11 +128,11 @@ fun ClientsScreen(
                     onDismissRequest = { expandedPlanFilter = false },
                     modifier = Modifier.fillMaxWidth(0.9f)
                 ) {
-                    allPlans.forEach { plan ->
+                    allPlanNames.forEach { plan ->
                         DropdownMenuItem(
                             text = { Text(if (plan == "All Plans") stringResource(R.string.all_plans) else plan) },
                             onClick = {
-                                selectedPlan = plan
+                                selectedPlanFilter = plan
                                 expandedPlanFilter = false
                             }
                         )
@@ -164,10 +166,10 @@ fun ClientsScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(filteredClients) { client ->
-                        val plan = subscriptions.find { it.clientId == client.id }?.planName ?: "No Plan"
+                        val planName = subscriptionPlans.find { it.id == client.subscriptionPlanId }?.name ?: "No Plan"
                         ClientCard(
                             client = client,
-                            planName = plan,
+                            planName = planName,
                             onClick = { onClientClick(client.id) }
                         )
                     }

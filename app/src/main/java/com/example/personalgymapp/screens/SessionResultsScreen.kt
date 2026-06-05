@@ -118,8 +118,10 @@ fun SessionResultsScreen(
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Text(text = planned.exerciseName, fontWeight = FontWeight.Bold)
+                                val setsLabel = if (planned.exerciseType == "REPS") "sets" else "rounds"
+                                val targetText = if (planned.exerciseType == "REPS") "${planned.reps} reps" else "${planned.targetDurationSeconds}s"
                                 Text(
-                                    text = "${planned.sets} sets x ${planned.reps} reps | ${planned.restSeconds}s rest",
+                                    text = "${planned.sets} $setsLabel x $targetText | ${planned.restSeconds}s rest",
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }
@@ -195,6 +197,7 @@ fun ExerciseResultCard(result: SessionExerciseResult) {
             }
 
             result.sets.forEach { set ->
+                val isTimeBased = set.durationSeconds != null
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -203,7 +206,7 @@ fun ExerciseResultCard(result: SessionExerciseResult) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Set ${set.setNumber}",
+                        text = if (isTimeBased) "Round ${set.setNumber}" else "Set ${set.setNumber}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold
                     )

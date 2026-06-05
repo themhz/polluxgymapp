@@ -110,7 +110,7 @@ fun EditWorkoutExerciseScreen(
                 OutlinedTextField(
                     value = sets,
                     onValueChange = { sets = it },
-                    label = { Text("Sets") },
+                    label = { Text(if (exerciseType == "REPS") "Sets" else "Rounds") },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )

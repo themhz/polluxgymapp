@@ -25,7 +25,8 @@ class MainActivity : AppCompatActivity() {
             database.exerciseDao(),
             database.workoutPlanDao(),
             database.trainingSessionDao(),
-            database.sessionResultDao()
+            database.sessionResultDao(),
+            database.subscriptionPlanDao()
         )
         val viewModel = ViewModelProvider(this, ClientViewModelFactory(repository))[ClientViewModel::class.java]
         

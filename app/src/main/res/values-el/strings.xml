@@ -8,6 +8,7 @@
     <string name="sensors">Αισθητήρες</string>
     <string name="garmin">Garmin</string>
     <string name="subscriptions">Συνδρομές</string>
+    <string name="subscription_plans">Προγράμματα Συνδρομών</string>
     <string name="settings">Ρυθμίσεις</string>
     <string name="language">Γλώσσα</string>
     <string name="currency">Νόμισμα</string>
@@ -67,6 +68,7 @@
     <string name="link_plan">Σύνδεση Προγράμματος</string>
     <string name="change_plan">Αλλαγή Προγράμματος</string>
     <string name="remove_plan">Αφαίρεση Προγράμματος</string>
+    <string name="add_to_google_calendar">Προσθήκη στο Google Calendar</string>
     <string name="session_notes">Σημειώσεις Συνεδρίας</string>
 
     <!-- Settings -->

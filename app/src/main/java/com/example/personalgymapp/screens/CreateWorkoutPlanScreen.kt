@@ -107,8 +107,9 @@ fun CreateWorkoutPlanScreen(
                             }
                         }
                         val typeText = if (workoutExercise.exerciseType == "REPS") "${workoutExercise.reps} reps" else "${workoutExercise.targetDurationSeconds}s"
+                        val setsRoundsText = if (workoutExercise.exerciseType == "REPS") "${workoutExercise.sets} sets" else "${workoutExercise.sets} rounds"
                         Text(
-                            text = "${workoutExercise.sets} sets x $typeText | ${workoutExercise.restSeconds}s rest",
+                            text = "$setsRoundsText x $typeText | ${workoutExercise.restSeconds}s rest",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -272,7 +273,7 @@ fun AddExerciseToPlanDialog(
                     OutlinedTextField(
                         value = sets,
                         onValueChange = { sets = it },
-                        label = { Text("Sets") },
+                        label = { Text(if (exerciseType == "REPS") "Sets" else "Rounds") },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )

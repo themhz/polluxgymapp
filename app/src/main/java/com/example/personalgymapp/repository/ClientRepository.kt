@@ -12,13 +12,15 @@ class ClientRepository(
     private val exerciseDao: ExerciseDao,
     private val workoutPlanDao: WorkoutPlanDao,
     private val trainingSessionDao: TrainingSessionDao,
-    private val sessionResultDao: SessionExerciseResultDao
+    private val sessionResultDao: SessionExerciseResultDao,
+    private val subscriptionPlanDao: SubscriptionPlanDao
 ) {
     val allClients: Flow<List<ClientEntity>> = clientDao.getAllClients()
     val allSubscriptions: Flow<List<SubscriptionEntity>> = subscriptionDao.getAllSubscriptions()
     val allExercises: Flow<List<Exercise>> = exerciseDao.getAllExercises()
     val allWorkoutPlans: Flow<List<WorkoutPlan>> = workoutPlanDao.getAllWorkoutPlans()
     val allSessions: Flow<List<TrainingSession>> = trainingSessionDao.getAllSessions()
+    val allSubscriptionPlans: Flow<List<SubscriptionPlanEntity>> = subscriptionPlanDao.getAllSubscriptionPlans()
 
     fun getClientById(id: Int): Flow<ClientEntity?> = clientDao.getClientById(id)
     
@@ -66,4 +68,9 @@ class ClientRepository(
 
     // Session Results
     suspend fun insertSessionResult(result: SessionExerciseResult) = sessionResultDao.insertResult(result)
+
+    // Subscription Plans
+    suspend fun insertSubscriptionPlan(plan: SubscriptionPlanEntity) = subscriptionPlanDao.insertSubscriptionPlan(plan)
+    suspend fun updateSubscriptionPlan(plan: SubscriptionPlanEntity) = subscriptionPlanDao.updateSubscriptionPlan(plan)
+    suspend fun deleteSubscriptionPlan(plan: SubscriptionPlanEntity) = subscriptionPlanDao.deleteSubscriptionPlan(plan)
 }

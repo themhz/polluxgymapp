@@ -1,5 +1,7 @@
 package com.example.personalgymapp.screens
 
+import android.content.Intent
+import android.provider.CalendarContract
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,6 +25,8 @@ import com.example.personalgymapp.R
 import com.example.personalgymapp.components.AddActionFab
 import com.example.personalgymapp.model.TrainingSession
 import com.example.personalgymapp.model.WorkoutPlan
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -219,6 +224,9 @@ fun CalendarScreen(
 
 @Composable
 fun SessionCard(session: TrainingSession, workoutPlanName: String?, onClick: () -> Unit) {
+    val context = LocalContext.current
+    val addToCalendarText = stringResource(R.string.add_to_google_calendar)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -238,23 +246,76 @@ fun SessionCard(session: TrainingSession, workoutPlanName: String?, onClick: () 
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.CalendarMonth,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = session.clientName,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
-                )
+                // Dummy spacer to balance the icon on the right if needed, 
+                // but we'll use a more centered layout
+                Spacer(modifier = Modifier.width(48.dp))
+                
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CalendarMonth,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = session.clientName,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                if (session.status == "Scheduled") {
+                    IconButton(onClick = {
+                        val calendar = Calendar.getInstance()
+                        val dateParts = session.date.split("-")
+                        if (dateParts.size == 3) {
+                            calendar.set(Calendar.YEAR, dateParts[0].toInt())
+                            calendar.set(Calendar.MONTH, dateParts[1].toInt() - 1)
+                            calendar.set(Calendar.DAY_OF_MONTH, dateParts[2].toInt())
+                        }
+
+                        val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                        try {
+                            val timeDate = timeFormat.parse(session.time)
+                            if (timeDate != null) {
+                                val timeCal = Calendar.getInstance()
+                                timeCal.time = timeDate
+                                calendar.set(Calendar.HOUR_OF_DAY, timeCal.get(Calendar.HOUR_OF_DAY))
+                                calendar.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE))
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+
+                        val intent = Intent(Intent.ACTION_INSERT)
+                            .setData(CalendarContract.Events.CONTENT_URI)
+                            .putExtra(CalendarContract.Events.TITLE, "Training with ${session.clientName}")
+                            .putExtra(CalendarContract.Events.DESCRIPTION, "Training session: ${session.sessionType}\n${session.notes}")
+                            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, calendar.timeInMillis)
+                            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, calendar.timeInMillis + (session.durationMinutes * 60 * 1000))
+                            .putExtra(CalendarContract.Events.EVENT_LOCATION, "Gym")
+
+                        context.startActivity(intent)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = addToCalendarText,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(48.dp))
+                }
             }
             
             if (workoutPlanName != null) {

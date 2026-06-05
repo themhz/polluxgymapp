@@ -18,9 +18,10 @@ import com.example.personalgymapp.model.*
         Exercise::class,
         WorkoutPlan::class,
         TrainingSession::class,
-        SessionExerciseResult::class
+        SessionExerciseResult::class,
+        SubscriptionPlanEntity::class
     ], 
-    version = 5, 
+    version = 6, 
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -32,6 +33,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun workoutPlanDao(): WorkoutPlanDao
     abstract fun trainingSessionDao(): TrainingSessionDao
     abstract fun sessionResultDao(): SessionExerciseResultDao
+    abstract fun subscriptionPlanDao(): SubscriptionPlanDao
 
     companion object {
         @Volatile

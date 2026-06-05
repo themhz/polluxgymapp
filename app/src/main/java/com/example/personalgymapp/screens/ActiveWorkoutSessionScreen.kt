@@ -244,8 +244,9 @@ fun ActiveWorkoutSessionScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                     if (isStarted && !isExerciseFinished) {
+                        val setLabel = if (currentExercise.exerciseType == "REPS") "Set" else "Round"
                         Text(
-                            text = if (isResting) "Next: Set ${currentExerciseSets.size + 1}" else "Set ${currentExerciseSets.size + 1}",
+                            text = if (isResting) "Next: $setLabel ${currentExerciseSets.size + 1}" else "$setLabel ${currentExerciseSets.size + 1}",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.secondary,
                             fontWeight = FontWeight.SemiBold
@@ -264,7 +265,8 @@ fun ActiveWorkoutSessionScreen(
             // Target Info Card
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(text = "Goal: ${currentExercise.sets} sets", fontWeight = FontWeight.Bold)
+                    val setsLabel = if (currentExercise.exerciseType == "REPS") "sets" else "rounds"
+                    Text(text = "Goal: ${currentExercise.sets} $setsLabel", fontWeight = FontWeight.Bold)
                     val goalText = if (currentExercise.exerciseType == "REPS") "${currentExercise.reps} reps" else "${currentExercise.targetDurationSeconds}s"
                     Text(text = "Target: $goalText | Rest: ${currentExercise.restSeconds}s")
                 }
@@ -340,7 +342,8 @@ fun ActiveWorkoutSessionScreen(
                 // Set History for current exercise
                 if (currentExerciseSets.isNotEmpty()) {
                     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Recorded Sets:", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
+                        val recordedLabel = if (currentExercise.exerciseType == "REPS") "Recorded Sets:" else "Recorded Rounds:"
+                        Text(recordedLabel, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
                         currentExerciseSets.forEach { set ->
                             val resText = if (currentExercise.exerciseType == "TIME") {
                                 "${set.durationSeconds ?: 0}s"
@@ -348,7 +351,8 @@ fun ActiveWorkoutSessionScreen(
                                 "${set.reps ?: 0} reps"
                             }
                             val weightText = if (set.weightKg != null && set.weightKg > 0) " @ ${set.weightKg}kg" else ""
-                            Text(text = "Set ${set.setNumber}: $resText$weightText", style = MaterialTheme.typography.bodySmall)
+                            val setLabel = if (currentExercise.exerciseType == "REPS") "Set" else "Round"
+                            Text(text = "$setLabel ${set.setNumber}: $resText$weightText", style = MaterialTheme.typography.bodySmall)
                         }
                         
                         TextButton(
@@ -357,7 +361,8 @@ fun ActiveWorkoutSessionScreen(
                         ) {
                             Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("Reset Exercise Progress")
+                            val resetLabel = if (currentExercise.exerciseType == "REPS") "Reset Exercise Progress" else "Reset Round Progress"
+                            Text(resetLabel)
                         }
                     }
                 }
@@ -428,7 +433,8 @@ fun ActiveWorkoutSessionScreen(
                             modifier = Modifier.fillMaxWidth(),
                             enabled = if (currentExercise.exerciseType == "REPS") repsInput.toIntOrNull() != null else true
                         ) {
-                            Text("Complete Set ${currentExerciseSets.size + 1}")
+                            val setLabel = if (currentExercise.exerciseType == "REPS") "Set" else "Round"
+                            Text("Complete $setLabel ${currentExerciseSets.size + 1}")
                         }
                     }
                 }

@@ -115,7 +115,9 @@ fun WorkoutPlanDetailsScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text(text = "${exercise.sets} Sets x ${exercise.reps} Reps")
+                                    val targetText = if (exercise.exerciseType == "REPS") "${exercise.reps} Reps" else "${exercise.targetDurationSeconds}s"
+                                    val setsLabel = if (exercise.exerciseType == "REPS") "Sets" else "Rounds"
+                                    Text(text = "${exercise.sets} $setsLabel x $targetText")
                                     Text(text = "Rest: ${exercise.restSeconds}s")
                                 }
                             }

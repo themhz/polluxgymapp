@@ -1,23 +1,29 @@
 package com.example.personalgymapp.screens
 
+import android.content.Intent
+import android.provider.CalendarContract
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.personalgymapp.R
 import com.example.personalgymapp.model.TrainingSession
 import com.example.personalgymapp.model.WorkoutPlan
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +40,7 @@ fun TrainingSessionDetailsScreen(
 ) {
     var showPlanSelectionDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -46,6 +53,40 @@ fun TrainingSessionDetailsScreen(
                 },
                 actions = {
                     if (trainingSession != null) {
+                        IconButton(onClick = {
+                            val calendar = Calendar.getInstance()
+                            val dateParts = trainingSession.date.split("-")
+                            if (dateParts.size == 3) {
+                                calendar.set(Calendar.YEAR, dateParts[0].toInt())
+                                calendar.set(Calendar.MONTH, dateParts[1].toInt() - 1)
+                                calendar.set(Calendar.DAY_OF_MONTH, dateParts[2].toInt())
+                            }
+
+                            val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+                            try {
+                                val timeDate = timeFormat.parse(trainingSession.time)
+                                if (timeDate != null) {
+                                    val timeCal = Calendar.getInstance()
+                                    timeCal.time = timeDate
+                                    calendar.set(Calendar.HOUR_OF_DAY, timeCal.get(Calendar.HOUR_OF_DAY))
+                                    calendar.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE))
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+
+                            val intent = Intent(Intent.ACTION_INSERT)
+                                .setData(CalendarContract.Events.CONTENT_URI)
+                                .putExtra(CalendarContract.Events.TITLE, "Training with ${trainingSession.clientName}")
+                                .putExtra(CalendarContract.Events.DESCRIPTION, "Training session: ${trainingSession.sessionType}\n${trainingSession.notes}")
+                                .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, calendar.timeInMillis)
+                                .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, calendar.timeInMillis + (trainingSession.durationMinutes * 60 * 1000))
+                                .putExtra(CalendarContract.Events.EVENT_LOCATION, "Gym")
+
+                            context.startActivity(intent)
+                        }) {
+                            Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.add_to_google_calendar), tint = MaterialTheme.colorScheme.primary)
+                        }
                         IconButton(onClick = { showDeleteDialog = true }) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete Session", tint = MaterialTheme.colorScheme.error)
                         }

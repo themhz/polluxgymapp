@@ -14,5 +14,6 @@ data class ClientEntity(
     val phone: String,
     val email: String,
     val sessionsCompleted: Int,
-    val nextSession: String
+    val nextSession: String,
+    val subscriptionPlanId: Int? = null
 )

@@ -26,6 +26,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
     val workoutPlans by clientViewModel.workoutPlans.collectAsState()
     val trainingSessions by clientViewModel.trainingSessions.collectAsState()
     val subscriptions by clientViewModel.subscriptions.collectAsState()
+    val subscriptionPlans by clientViewModel.subscriptionPlans.collectAsState()
 
     // Filter states for Exercise Library
     var exerciseSearchQuery by remember { mutableStateOf("") }
@@ -43,13 +44,49 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 onCalendarClick = { navController.navigate("calendar") },
                 onSensorsClick = { navController.navigate("sensors") },
                 onGarminClick = { navController.navigate("garminSettings") },
-                onSubscriptionsClick = { navController.navigate("subscriptions") },
+                onSubscriptionsClick = { navController.navigate("subscriptionPlans") },
                 onSettingsClick = { navController.navigate("settings") }
             )
         }
         composable("settings") {
             SettingsScreen(
                 viewModel = settingsViewModel,
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable("subscriptionPlans") {
+            SubscriptionPlansScreen(
+                plans = subscriptionPlans,
+                onAddPlanClick = { navController.navigate("addSubscriptionPlan") },
+                onPlanClick = { planId -> navController.navigate("editSubscriptionPlan/$planId") },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable("addSubscriptionPlan") {
+            AddSubscriptionPlanScreen(
+                onSavePlan = { plan ->
+                    clientViewModel.addSubscriptionPlan(plan)
+                    navController.popBackStack()
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "editSubscriptionPlan/{planId}",
+            arguments = listOf(navArgument("planId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val planId = backStackEntry.arguments?.getInt("planId") ?: -1
+            val plan = subscriptionPlans.find { it.id == planId }
+            EditSubscriptionPlanScreen(
+                plan = plan,
+                onSavePlan = { updatedPlan ->
+                    clientViewModel.updateSubscriptionPlan(updatedPlan)
+                    navController.popBackStack()
+                },
+                onDeletePlan = { planToDelete ->
+                    clientViewModel.deleteSubscriptionPlan(planToDelete)
+                    navController.popBackStack()
+                },
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -100,6 +137,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             ClientsScreen(
                 clients = clients,
                 subscriptions = subscriptions,
+                subscriptionPlans = subscriptionPlans,
                 onBackClick = { navController.popBackStack() },
                 onClientClick = { clientId -> 
                     navController.navigate("clientDetails/$clientId") 
@@ -109,6 +147,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         }
         composable("addClient") {
             AddClientScreen(
+                subscriptionPlans = subscriptionPlans,
                 onSaveClient = { newClient ->
                     clientViewModel.addClient(newClient)
                     navController.popBackStack()
@@ -158,6 +197,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             val client = clients.find { it.id == clientId }
             EditClientScreen(
                 client = client,
+                subscriptionPlans = subscriptionPlans,
                 onSaveClient = { updatedClient ->
                     clientViewModel.updateClient(updatedClient)
                     navController.popBackStack()

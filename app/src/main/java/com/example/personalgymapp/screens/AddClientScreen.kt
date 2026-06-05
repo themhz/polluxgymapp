@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.personalgymapp.database.entity.ClientEntity
+import com.example.personalgymapp.database.entity.SubscriptionPlanEntity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -19,6 +20,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddClientScreen(
+    subscriptionPlans: List<SubscriptionPlanEntity>,
     onSaveClient: (ClientEntity) -> Unit,
     onBackClick: () -> Unit,
 ) {
@@ -27,6 +29,7 @@ fun AddClientScreen(
     var birthDate by remember { mutableStateOf<Date?>(null) }
     var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var selectedPlanId by remember { mutableStateOf<Int?>(null) }
 
     var nameError by remember { mutableStateOf<String?>(null) }
     var goalError by remember { mutableStateOf<String?>(null) }
@@ -35,6 +38,8 @@ fun AddClientScreen(
 
     val birthDatePickerState = rememberDatePickerState()
     var showBirthDatePicker by remember { mutableStateOf(false) }
+
+    var expandedPlans by remember { mutableStateOf(false) }
 
     if (showBirthDatePicker) {
         DatePickerDialog(
@@ -140,6 +145,37 @@ fun AddClientScreen(
                 supportingText = { emailError?.let { Text(it) } }
             )
 
+            // Subscription Plan Dropdown
+            ExposedDropdownMenuBox(
+                expanded = expandedPlans,
+                onExpandedChange = { expandedPlans = !expandedPlans },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = subscriptionPlans.find { it.id == selectedPlanId }?.name ?: "Select Subscription Plan",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Subscription Plan") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPlans) },
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedPlans,
+                    onDismissRequest = { expandedPlans = false }
+                ) {
+                    subscriptionPlans.forEach { plan ->
+                        DropdownMenuItem(
+                            text = { Text("${plan.name} (€${plan.price})") },
+                            onClick = {
+                                selectedPlanId = plan.id
+                                expandedPlans = false
+                            }
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
@@ -170,7 +206,8 @@ fun AddClientScreen(
                             phone = phone,
                             email = email,
                             sessionsCompleted = 0,
-                            nextSession = "Not scheduled"
+                            nextSession = "Not scheduled",
+                            subscriptionPlanId = selectedPlanId
                         )
                         onSaveClient(newClient)
                     }

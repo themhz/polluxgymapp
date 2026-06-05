@@ -95,10 +95,10 @@ fun HomeScreen(
                         onClick = onClientsClick
                     )
                     MenuCard(
-                        title = stringResource(R.string.workout_plans),
-                        icon = Icons.AutoMirrored.Filled.Assignment,
+                        title = stringResource(R.string.subscription_plans),
+                        icon = Icons.Default.Subscriptions,
                         modifier = Modifier.weight(1f),
-                        onClick = onWorkoutsClick
+                        onClick = onSubscriptionsClick
                     )
                 }
                 Row(
@@ -106,10 +106,10 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     MenuCard(
-                        title = stringResource(R.string.progress),
-                        icon = Icons.AutoMirrored.Filled.TrendingUp,
+                        title = stringResource(R.string.workout_plans),
+                        icon = Icons.AutoMirrored.Filled.Assignment,
                         modifier = Modifier.weight(1f),
-                        onClick = onProgressClick
+                        onClick = onWorkoutsClick
                     )
                     MenuCard(
                         title = stringResource(R.string.training_sessions),
@@ -124,16 +124,16 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     MenuCard(
+                        title = stringResource(R.string.progress),
+                        icon = Icons.AutoMirrored.Filled.TrendingUp,
+                        modifier = Modifier.weight(1f),
+                        onClick = onProgressClick
+                    )
+                    MenuCard(
                         title = stringResource(R.string.sensors),
                         icon = Icons.Default.Sensors,
                         modifier = Modifier.weight(1f),
                         onClick = onSensorsClick
-                    )
-                    MenuCard(
-                        title = stringResource(R.string.garmin),
-                        icon = Icons.Default.Watch,
-                        modifier = Modifier.weight(1f),
-                        onClick = onGarminClick
                     )
                 }
 
@@ -142,10 +142,10 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     MenuCard(
-                        title = stringResource(R.string.subscriptions),
-                        icon = Icons.Default.Subscriptions,
+                        title = stringResource(R.string.garmin),
+                        icon = Icons.Default.Watch,
                         modifier = Modifier.weight(1f),
-                        onClick = onSubscriptionsClick
+                        onClick = onGarminClick
                     )
                     Spacer(modifier = Modifier.weight(1f))
                 }
