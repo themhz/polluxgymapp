@@ -9,6 +9,8 @@ import com.example.personalgymapp.notifications.NotificationHelper
 import com.example.personalgymapp.repository.ClientRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ClientViewModel(application: Application, private val repository: ClientRepository) : AndroidViewModel(application) {
 
@@ -82,6 +84,35 @@ class ClientViewModel(application: Application, private val repository: ClientRe
 
     fun seedDatabaseIfEmpty() {
         viewModelScope.launch {
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+            // Seed Clients
+            val currentClients = repository.allClients.first()
+            if (currentClients.isEmpty()) {
+                val seedClients = listOf(
+                    ClientEntity(
+                        name = "Γιώργος Παπαδόπουλος",
+                        goal = "Απώλεια βάρους",
+                        birthDate = sdf.parse("1985-06-15") ?: Date(),
+                        phone = "6912345678",
+                        email = "giorgos@example.com",
+                        sessionsCompleted = 0,
+                        nextSession = "Not scheduled"
+                    ),
+                    ClientEntity(
+                        name = "Μαρία Κωνσταντίνου",
+                        goal = "Ενδυνάμωση",
+                        birthDate = sdf.parse("1992-03-20") ?: Date(),
+                        phone = "6987654321",
+                        email = "maria@example.com",
+                        sessionsCompleted = 0,
+                        nextSession = "Not scheduled"
+                    )
+                )
+                seedClients.forEach { repository.insertClient(it) }
+            }
+
+            // Seed Exercises
             val currentExercises = repository.allExercises.first()
             if (currentExercises.isEmpty()) {
                 val seedExercises = listOf(

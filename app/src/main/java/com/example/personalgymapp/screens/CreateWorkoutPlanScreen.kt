@@ -256,7 +256,7 @@ fun AddExerciseToPlanDialog(
                         FilterChip(
                             selected = timerType == "COUNTDOWN",
                             onClick = { timerType = "COUNTDOWN" },
-                            label = { Text("Countdown") },
+                            label = { Text("Count-down") },
                             modifier = Modifier.weight(1f)
                         )
                         Spacer(Modifier.width(8.dp))

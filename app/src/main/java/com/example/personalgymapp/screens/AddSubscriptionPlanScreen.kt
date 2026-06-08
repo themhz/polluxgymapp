@@ -6,9 +6,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.personalgymapp.database.entity.SubscriptionPlanEntity
@@ -21,7 +24,8 @@ fun AddSubscriptionPlanScreen(
 ) {
     var name by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
-    var durationDays by remember { mutableStateOf("") }
+    var durationType by remember { mutableStateOf("Monthly") } // "Monthly" or "Days"
+    var durationValue by remember { mutableStateOf("1") }
     var description by remember { mutableStateOf("") }
 
     var nameError by remember { mutableStateOf<String?>(null) }
@@ -54,10 +58,35 @@ fun AddSubscriptionPlanScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Explanatory Message
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "Εδώ δημιουργείτε τα πακέτα συνδρομών σας. Ορίστε το όνομα, την τιμή και τη διάρκεια. Αυτά τα πλάνα θα εμφανίζονται ως επιλογές όταν προσθέτετε μια νέα συνδρομή σε έναν πελάτη.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it; nameError = null },
-                label = { Text("Plan Name") },
+                label = { Text("Plan Name (e.g. Monthly Silver)") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = nameError != null,
                 supportingText = { nameError?.let { Text(it) } }
@@ -73,10 +102,40 @@ fun AddSubscriptionPlanScreen(
                 supportingText = { priceError?.let { Text(it) } }
             )
 
+            Text(
+                text = "Plan Duration",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = durationType == "Monthly",
+                    onClick = { 
+                        durationType = "Monthly"
+                        if (durationValue.isEmpty()) durationValue = "1"
+                    },
+                    label = { Text("Monthly") },
+                    modifier = Modifier.weight(1f)
+                )
+                FilterChip(
+                    selected = durationType == "Days",
+                    onClick = { 
+                        durationType = "Days"
+                        if (durationValue.isEmpty()) durationValue = "30"
+                    },
+                    label = { Text("Days") },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
             OutlinedTextField(
-                value = durationDays,
-                onValueChange = { durationDays = it; durationError = null },
-                label = { Text("Duration (Days)") },
+                value = durationValue,
+                onValueChange = { durationValue = it; durationError = null },
+                label = { Text(if (durationType == "Monthly") "Number of Months" else "Number of Days") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 isError = durationError != null,
@@ -91,7 +150,7 @@ fun AddSubscriptionPlanScreen(
                 minLines = 3
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
@@ -105,18 +164,19 @@ fun AddSubscriptionPlanScreen(
                         priceError = "Invalid price"
                         isValid = false
                     }
-                    val durationValue = durationDays.toIntOrNull()
-                    if (durationValue == null) {
+                    val durationInt = durationValue.toIntOrNull()
+                    if (durationInt == null || durationInt <= 0) {
                         durationError = "Invalid duration"
                         isValid = false
                     }
 
                     if (isValid) {
+                        val finalDays = if (durationType == "Monthly") durationInt!! * 30 else durationInt!!
                         onSavePlan(
                             SubscriptionPlanEntity(
                                 name = name,
                                 price = priceValue!!,
-                                durationDays = durationValue!!,
+                                durationDays = finalDays,
                                 description = description
                             )
                         )

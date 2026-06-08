@@ -10,15 +10,19 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.personalgymapp.R
 import com.example.personalgymapp.viewmodel.SettingsViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,6 +31,8 @@ fun SettingsScreen(
     onBackClick: () -> Unit
 ) {
     val settings by viewModel.settings.collectAsState()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         topBar = {
@@ -44,6 +50,7 @@ fun SettingsScreen(
                 )
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
@@ -54,6 +61,49 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            // Google Authentication Section
+            SettingsGroup(title = "Account & Sync", icon = Icons.Default.Cloud) {
+                if (settings.isGoogleConnected) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                        Spacer(Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(text = "Connected as", style = MaterialTheme.typography.labelSmall)
+                            Text(text = settings.googleAccountName ?: "Google Account", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                        }
+                        TextButton(onClick = { viewModel.disconnectGoogle() }) {
+                            Text("Disconnect", color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                } else {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Connect your Google account to sync data and enable future cloud features.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                        Button(
+                            onClick = {
+                                // Placeholder for actual Google Sign-In logic
+                                // This requires a Web Client ID from Google Cloud Console
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Google Sign-In requires a Google Cloud Project ID. Set up keys in the next phase.")
+                                    // Simulating successful connection for UI demonstration
+                                    viewModel.connectGoogle("trainer.user@gmail.com")
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                        ) {
+                            Text("Connect with Google")
+                        }
+                    }
+                }
+            }
+
             // Language Setting
             SettingsGroup(title = stringResource(R.string.language), icon = Icons.Default.Language) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

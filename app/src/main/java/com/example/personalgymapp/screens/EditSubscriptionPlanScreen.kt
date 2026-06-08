@@ -7,8 +7,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -23,7 +25,7 @@ fun EditSubscriptionPlanScreen(
     onBackClick: () -> Unit
 ) {
     if (plan == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Plan not found")
         }
         return
@@ -31,7 +33,12 @@ fun EditSubscriptionPlanScreen(
 
     var name by remember { mutableStateOf(plan.name) }
     var price by remember { mutableStateOf(plan.price.toString()) }
-    var durationDays by remember { mutableStateOf(plan.durationDays.toString()) }
+    var durationType by remember { 
+        mutableStateOf(if (plan.durationDays % 30 == 0) "Monthly" else "Days") 
+    }
+    var durationValue by remember { 
+        mutableStateOf(if (plan.durationDays % 30 == 0) (plan.durationDays / 30).toString() else plan.durationDays.toString()) 
+    }
     var description by remember { mutableStateOf(plan.description) }
 
     var nameError by remember { mutableStateOf<String?>(null) }
@@ -95,6 +102,31 @@ fun EditSubscriptionPlanScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Explanatory Message
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = "Τροποποιήστε τα στοιχεία του πακέτου συνδρομής. Οι αλλαγές θα επηρεάσουν μόνο τις μελλοντικές αναθέσεις αυτού του πλάνου.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it; nameError = null },
@@ -114,10 +146,34 @@ fun EditSubscriptionPlanScreen(
                 supportingText = { priceError?.let { Text(it) } }
             )
 
+            Text(
+                text = "Plan Duration",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = durationType == "Monthly",
+                    onClick = { durationType = "Monthly" },
+                    label = { Text("Monthly") },
+                    modifier = Modifier.weight(1f)
+                )
+                FilterChip(
+                    selected = durationType == "Days",
+                    onClick = { durationType = "Days" },
+                    label = { Text("Days") },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
             OutlinedTextField(
-                value = durationDays,
-                onValueChange = { durationDays = it; durationError = null },
-                label = { Text("Duration (Days)") },
+                value = durationValue,
+                onValueChange = { durationValue = it; durationError = null },
+                label = { Text(if (durationType == "Monthly") "Number of Months" else "Number of Days") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 isError = durationError != null,
@@ -146,18 +202,19 @@ fun EditSubscriptionPlanScreen(
                         priceError = "Invalid price"
                         isValid = false
                     }
-                    val durationValue = durationDays.toIntOrNull()
-                    if (durationValue == null) {
+                    val durationInt = durationValue.toIntOrNull()
+                    if (durationInt == null || durationInt <= 0) {
                         durationError = "Invalid duration"
                         isValid = false
                     }
 
                     if (isValid) {
+                        val finalDays = if (durationType == "Monthly") durationInt!! * 30 else durationInt!!
                         onSavePlan(
                             plan.copy(
                                 name = name,
                                 price = priceValue!!,
-                                durationDays = durationValue!!,
+                                durationDays = finalDays,
                                 description = description
                             )
                         )

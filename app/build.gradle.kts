@@ -56,6 +56,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)
     implementation(libs.gson)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     // Room
     implementation(libs.androidx.room.runtime)

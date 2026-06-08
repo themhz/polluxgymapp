@@ -12,7 +12,9 @@ data class AppSettings(
     val currency: String = "EUR", // "USD" or "EUR"
     val decimalSeparator: String = ".",
     val thousandSeparator: String = ",",
-    val notificationsEnabled: Boolean = true
+    val notificationsEnabled: Boolean = true,
+    val isGoogleConnected: Boolean = false,
+    val googleAccountName: String? = null
 )
 
 class SettingsViewModel : ViewModel() {
@@ -52,5 +54,19 @@ class SettingsViewModel : ViewModel() {
 
     fun updateNotificationsEnabled(enabled: Boolean) {
         _settings.value = _settings.value.copy(notificationsEnabled = enabled)
+    }
+
+    fun connectGoogle(name: String) {
+        _settings.value = _settings.value.copy(
+            isGoogleConnected = true,
+            googleAccountName = name
+        )
+    }
+
+    fun disconnectGoogle() {
+        _settings.value = _settings.value.copy(
+            isGoogleConnected = false,
+            googleAccountName = null
+        )
     }
 }
