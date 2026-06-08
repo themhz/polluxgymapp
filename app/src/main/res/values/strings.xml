@@ -140,6 +140,7 @@
 
     <!-- Payments -->
     <string name="payment_history">Payment History</string>
+    <string name="add_subscription">Add Subscription</string>
     <string name="add_payment">Add Payment</string>
     <string name="add_payment_for">Add Payment for %s</string>
     <string name="amount_euro">Amount (€)</string>

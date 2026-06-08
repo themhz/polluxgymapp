@@ -30,6 +30,7 @@ fun ClientDetailsScreen(
     trainingSessions: List<TrainingSession>,
     payments: List<Payment>,
     onAddPaymentClick: (Int) -> Unit,
+    onAddSubscriptionClick: (Int) -> Unit,
     onEditClick: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -89,12 +90,24 @@ fun ClientDetailsScreen(
                 
                 HorizontalDivider()
 
-                Text(
-                    text = "Subscription Status",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.subscriptions),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    val clientSubscription = subscriptions.find { it.clientId == client.id }
+                    if (clientSubscription == null) {
+                        IconButton(onClick = { onAddSubscriptionClick(client.id) }) {
+                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_subscription))
+                        }
+                    }
+                }
 
                 val clientSubscription = subscriptions.find { it.clientId == client.id }
                 if (clientSubscription != null) {
@@ -110,7 +123,11 @@ fun ClientDetailsScreen(
                         }
                     }
                 } else {
-                    Text(text = "No active subscription found.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.tertiary)
+                    Text(
+                        text = "No active subscription found.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
                 }
 
                 HorizontalDivider()

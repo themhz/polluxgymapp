@@ -140,6 +140,7 @@
 
     <!-- Payments -->
     <string name="payment_history">Ιστορικό Πληρωμών</string>
+    <string name="add_subscription">Προσθήκη Συνδρομής</string>
     <string name="add_payment">Προσθήκη Πληρωμής</string>
     <string name="add_payment_for">Προσθήκη Πληρωμής για %s</string>
     <string name="amount_euro">Ποσό (€)</string>

@@ -56,11 +56,23 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 onBackClick = { navController.popBackStack() }
             )
         }
-        composable("subscriptionPlans") {
+        composable(
+            route = "subscriptionPlans?selectionMode={selectionMode}",
+            arguments = listOf(navArgument("selectionMode") { 
+                type = NavType.BoolType
+                defaultValue = false
+            })
+        ) { backStackEntry ->
+            val isSelectionMode = backStackEntry.arguments?.getBoolean("selectionMode") ?: false
             SubscriptionPlansScreen(
                 plans = subscriptionPlans,
+                isSelectionMode = isSelectionMode,
                 onAddPlanClick = { navController.navigate("addSubscriptionPlan") },
                 onPlanClick = { planId -> navController.navigate("editSubscriptionPlan/$planId") },
+                onPlanSelected = { planId ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set("selectedPlanId", planId)
+                    navController.popBackStack()
+                },
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -119,9 +131,27 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 onBackClick = { navController.popBackStack() }
             )
         }
-        composable("addSubscription") {
+        composable(
+            route = "addSubscription?clientId={clientId}",
+            arguments = listOf(navArgument("clientId") { 
+                type = NavType.IntType
+                defaultValue = -1
+            })
+        ) { backStackEntry ->
+            val clientId = backStackEntry.arguments?.getInt("clientId") ?: -1
+            val selectedPlanId by backStackEntry.savedStateHandle.getStateFlow<Int?>("selectedPlanId", null).collectAsState()
+            
             AddSubscriptionScreen(
                 clients = clients,
+                subscriptionPlans = subscriptionPlans,
+                initialClientId = clientId,
+                selectedPlanIdFromNav = selectedPlanId,
+                onNavigateToSelectPlan = {
+                    navController.navigate("subscriptionPlans?selectionMode=true")
+                },
+                onNavigateToAddPlan = {
+                    navController.navigate("addSubscriptionPlan")
+                },
                 onSaveSubscription = { newSub ->
                     clientViewModel.addSubscription(newSub)
                     navController.popBackStack()
@@ -171,6 +201,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 trainingSessions = trainingSessions,
                 payments = payments,
                 onAddPaymentClick = { id -> navController.navigate("addPayment/$id") },
+                onAddSubscriptionClick = { id -> navController.navigate("addSubscription?clientId=$id") },
                 onEditClick = { id -> navController.navigate("editClient/$id") },
                 onBackClick = { navController.popBackStack() }
             )

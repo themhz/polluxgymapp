@@ -21,14 +21,21 @@ import com.example.personalgymapp.database.entity.SubscriptionPlanEntity
 @Composable
 fun SubscriptionPlansScreen(
     plans: List<SubscriptionPlanEntity>,
+    isSelectionMode: Boolean = false,
     onAddPlanClick: () -> Unit,
     onPlanClick: (Int) -> Unit,
+    onPlanSelected: (Int) -> Unit = {},
     onBackClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.subscription_plans)) },
+                title = { 
+                    Text(
+                        if (isSelectionMode) "Select Plan Template" 
+                        else stringResource(R.string.subscription_plans)
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -42,10 +49,12 @@ fun SubscriptionPlansScreen(
             )
         },
         floatingActionButton = {
-            AddActionFab(
-                label = "Add Plan",
-                onClick = onAddPlanClick
-            )
+            if (!isSelectionMode) {
+                AddActionFab(
+                    label = "Add Plan",
+                    onClick = onAddPlanClick
+                )
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
@@ -69,7 +78,10 @@ fun SubscriptionPlansScreen(
                 items(plans) { plan ->
                     SubscriptionPlanCard(
                         plan = plan,
-                        onClick = { onPlanClick(plan.id) }
+                        onClick = { 
+                            if (isSelectionMode) onPlanSelected(plan.id)
+                            else onPlanClick(plan.id)
+                        }
                     )
                 }
             }
