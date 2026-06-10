@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +14,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
@@ -57,6 +58,7 @@ fun CalendarScreen(
     
     var searchQuery by remember { mutableStateOf("") }
     var showAutocomplete by remember { mutableStateOf(false) }
+    var expandedStatusFilter by remember { mutableStateOf(false) }
 
     val filteredSessions = trainingSessions.filter { session ->
         val planName = workoutPlans.find { it.id == session.workoutPlanId }?.name ?: ""
@@ -179,22 +181,52 @@ fun CalendarScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        items(statuses) { status ->
-                            FilterChip(
-                                selected = selectedStatus == status,
-                                onClick = { selectedStatus = status },
-                                label = { Text(status) },
-                                shape = RoundedCornerShape(16.dp),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = MaterialTheme.colorScheme.primary,
-                                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-                                )
+                    // Status Dropdown Filter
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = selectedStatus,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text(stringResource(R.string.filter_by_status)) },
+                            trailingIcon = {
+                                IconButton(onClick = { expandedStatusFilter = !expandedStatusFilter }) {
+                                    Icon(
+                                        imageVector = if (expandedStatusFilter) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                        contentDescription = null
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface
                             )
+                        )
+                        DropdownMenu(
+                            expanded = expandedStatusFilter,
+                            onDismissRequest = { expandedStatusFilter = false },
+                            modifier = Modifier.fillMaxWidth(0.9f)
+                        ) {
+                            statuses.forEach { status ->
+                                DropdownMenuItem(
+                                    text = { Text(status) },
+                                    onClick = {
+                                        selectedStatus = status
+                                        expandedStatusFilter = false
+                                    }
+                                )
+                            }
                         }
+                        // Transparent clickable layer
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .padding(top = 8.dp)
+                                .clickable { expandedStatusFilter = !expandedStatusFilter }
+                        )
                     }
                 }
             }

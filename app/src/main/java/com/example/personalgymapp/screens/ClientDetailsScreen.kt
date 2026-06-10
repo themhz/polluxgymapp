@@ -6,11 +6,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,6 +32,7 @@ fun ClientDetailsScreen(
     trainingSessions: List<TrainingSession>,
     payments: List<Payment>,
     onAddPaymentClick: (Int) -> Unit,
+    onDeletePaymentClick: (Payment) -> Unit,
     onAddSubscriptionClick: (Int) -> Unit,
     onEditClick: (Int) -> Unit,
     onBackClick: () -> Unit
@@ -78,15 +81,25 @@ fun ClientDetailsScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                DetailItem(label = "Goal", value = client.goal)
-                DetailItem(label = "Birth Date", value = sdf.format(client.birthDate))
-                DetailItem(label = "Phone", value = client.phone.ifBlank { "Not provided" })
-                DetailItem(label = "Email", value = client.email)
+                DetailItem(label = stringResource(R.string.client_goal), value = client.goal)
+                DetailItem(label = stringResource(R.string.client_birthdate), value = sdf.format(client.birthDate))
+                DetailItem(label = stringResource(R.string.client_phone), value = client.phone.ifBlank { stringResource(R.string.not_scheduled) })
+                DetailItem(label = stringResource(R.string.client_email), value = client.email)
                 
                 val completedSessionsCount = trainingSessions.count { it.clientId == client.id && it.status == "Completed" }
                 DetailItem(label = stringResource(R.string.sessions_completed).substringBefore(":"), value = completedSessionsCount.toString())
 
-                DetailItem(label = stringResource(R.string.next_session).substringBefore(":"), value = client.nextSession)
+                val sessionLabel = stringResource(R.string.next_session_label)
+                val nextSessionValue = if (client.nextSession == "Not scheduled") stringResource(R.string.not_scheduled) else client.nextSession
+                Column {
+                    DetailItem(label = sessionLabel, value = nextSessionValue)
+                    Text(
+                        text = stringResource(R.string.client_next_session_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
                 
                 HorizontalDivider()
 
@@ -113,18 +126,41 @@ fun ClientDetailsScreen(
                 if (clientSubscription != null) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF008080),
+                            contentColor = Color.White
+                        )
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = stringResource(R.string.client_plan, clientSubscription.planName), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                            Text(text = "${stringResource(R.string.status)}: ${clientSubscription.status}", color = if (clientSubscription.status == "Paid") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
-                            Text(text = "Owes: €${clientSubscription.balance}", style = MaterialTheme.typography.bodyMedium)
-                            Text(text = "Next Payment Due: ${clientSubscription.dueDate}", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                text = stringResource(R.string.client_plan, clientSubscription.planName),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            val statusText = when(clientSubscription.status) {
+                                "Paid" -> stringResource(R.string.paid)
+                                "Pending" -> stringResource(R.string.pending)
+                                "Overdue" -> stringResource(R.string.overdue)
+                                else -> clientSubscription.status
+                            }
+                            Text(
+                                text = "${stringResource(R.string.status)}: $statusText",
+                                color = if (clientSubscription.status == "Paid") Color(0xFFE0F2F1) else Color(0xFFFFEBEE)
+                            )
+                            Text(
+                                text = stringResource(R.string.owes, "€${clientSubscription.balance}"),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = stringResource(R.string.next_payment_due, clientSubscription.dueDate),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
                         }
                     }
                 } else {
                     Text(
-                        text = "No active subscription found.",
+                        text = stringResource(R.string.no_active_subscription),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -167,8 +203,23 @@ fun ClientDetailsScreen(
                                     Text(text = "€${payment.amount}", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                                     Text(text = payment.date, style = MaterialTheme.typography.bodySmall)
                                 }
-                                if (payment.notes.isNotBlank()) {
-                                    Text(text = payment.notes, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    if (payment.notes.isNotBlank()) {
+                                        Text(
+                                            text = payment.notes,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            modifier = Modifier.padding(end = 8.dp)
+                                        )
+                                    }
+                                    IconButton(onClick = { onDeletePaymentClick(payment) }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Delete Payment",
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                 }
                             }
                         }

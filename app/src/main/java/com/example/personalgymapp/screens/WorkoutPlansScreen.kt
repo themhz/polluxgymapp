@@ -75,7 +75,7 @@ fun WorkoutPlansScreen(
         },
         floatingActionButton = {
             AddActionFab(
-                label = stringResource(R.string.create_workout),
+                label = stringResource(R.string.create_workout_plan),
                 onClick = onCreateWorkoutClick
             )
         },

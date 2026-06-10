@@ -53,6 +53,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
         composable("settings") {
             SettingsScreen(
                 viewModel = settingsViewModel,
+                clientViewModel = clientViewModel,
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -201,6 +202,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 trainingSessions = trainingSessions,
                 payments = payments,
                 onAddPaymentClick = { id -> navController.navigate("addPayment/$id") },
+                onDeletePaymentClick = { payment -> clientViewModel.deletePayment(payment) },
                 onAddSubscriptionClick = { id -> navController.navigate("addSubscription?clientId=$id") },
                 onEditClick = { id -> navController.navigate("editClient/$id") },
                 onBackClick = { navController.popBackStack() }
@@ -430,6 +432,25 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
                 },
                 onDeleteSession = { sessionToDelete ->
                     clientViewModel.deleteSession(sessionToDelete)
+                    navController.popBackStack()
+                },
+                onEditClick = { id ->
+                    navController.navigate("editTrainingSession/$id")
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "editTrainingSession/{trainingSessionId}",
+            arguments = listOf(navArgument("trainingSessionId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val sessionId = backStackEntry.arguments?.getInt("trainingSessionId") ?: -1
+            val session = trainingSessions.find { it.id == sessionId }
+            EditTrainingSessionScreen(
+                session = session,
+                workoutPlans = workoutPlans,
+                onSaveTrainingSession = { updatedSession ->
+                    clientViewModel.updateSession(updatedSession)
                     navController.popBackStack()
                 },
                 onBackClick = { navController.popBackStack() }

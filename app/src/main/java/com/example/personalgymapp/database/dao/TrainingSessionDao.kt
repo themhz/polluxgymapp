@@ -20,4 +20,7 @@ interface TrainingSessionDao {
 
     @Delete
     suspend fun deleteSession(session: TrainingSession)
+
+    @Query("DELETE FROM training_sessions")
+    suspend fun clearTable()
 }

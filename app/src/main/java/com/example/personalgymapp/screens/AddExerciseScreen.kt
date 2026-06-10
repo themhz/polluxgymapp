@@ -10,11 +10,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.personalgymapp.R
+import com.example.personalgymapp.components.FieldExplanation
 import com.example.personalgymapp.model.Exercise
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +86,7 @@ fun AddExerciseScreen(
                 title = { Text(stringResource(R.string.add_exercise)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -110,7 +112,10 @@ fun AddExerciseScreen(
                 label = { Text(stringResource(R.string.exercise_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = nameError != null,
-                supportingText = { nameError?.let { Text(it) } }
+                supportingText = { nameError?.let { Text(it) } },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.ex_name_desc))
+                }
             )
 
             // Muscle Group selection
@@ -124,7 +129,12 @@ fun AddExerciseScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.muscle_group)) },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMuscle) },
+                    trailingIcon = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            FieldExplanation(explanation = stringResource(R.string.ex_muscle_group_desc))
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMuscle)
+                        }
+                    },
                     modifier = Modifier.menuAnchor().fillMaxWidth(),
                     isError = muscleGroupError != null,
                     supportingText = { muscleGroupError?.let { Text(it) } }
@@ -151,7 +161,10 @@ fun AddExerciseScreen(
                 onValueChange = { equipment = it },
                 label = { Text(stringResource(R.string.equipment)) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(stringResource(R.string.equipment_hint)) }
+                placeholder = { Text(stringResource(R.string.equipment_hint)) },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.ex_equipment_desc))
+                }
             )
 
             var expandedDiff by remember { mutableStateOf(false) }
@@ -164,7 +177,12 @@ fun AddExerciseScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.difficulty)) },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDiff) },
+                    trailingIcon = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            FieldExplanation(explanation = stringResource(R.string.ex_difficulty_desc))
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDiff)
+                        }
+                    },
                     modifier = Modifier.menuAnchor().fillMaxWidth()
                 )
                 ExposedDropdownMenu(
@@ -190,7 +208,10 @@ fun AddExerciseScreen(
                 modifier = Modifier.fillMaxWidth().height(150.dp),
                 isError = instructionsError != null,
                 supportingText = { instructionsError?.let { Text(it) } },
-                maxLines = 5
+                maxLines = 5,
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.ex_instructions_desc))
+                }
             )
 
             var expandedFocus by remember { mutableStateOf(false) }
@@ -203,7 +224,12 @@ fun AddExerciseScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.focus_area)) },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFocus) },
+                    trailingIcon = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            FieldExplanation(explanation = stringResource(R.string.ex_focus_area_desc))
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedFocus)
+                        }
+                    },
                     modifier = Modifier.menuAnchor().fillMaxWidth()
                 )
                 ExposedDropdownMenu(
@@ -232,7 +258,12 @@ fun AddExerciseScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.training_type)) },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedType) },
+                    trailingIcon = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            FieldExplanation(explanation = stringResource(R.string.ex_training_type_desc))
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedType)
+                        }
+                    },
                     modifier = Modifier.menuAnchor().fillMaxWidth()
                 )
                 ExposedDropdownMenu(
@@ -256,7 +287,10 @@ fun AddExerciseScreen(
                 onValueChange = { imageResName = it },
                 label = { Text(stringResource(R.string.image_res)) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("e.g. squats") }
+                placeholder = { Text("e.g. squats") },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.ex_image_res_desc))
+                }
             )
 
             // Image Picker Button
@@ -265,7 +299,14 @@ fun AddExerciseScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = stringResource(R.string.external_image), style = MaterialTheme.typography.labelLarge)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = stringResource(R.string.external_image), style = MaterialTheme.typography.labelLarge)
+                        FieldExplanation(explanation = stringResource(R.string.ex_external_media_desc))
+                    }
                     Spacer(Modifier.height(8.dp))
                     if (selectedImageUri != null) {
                         AsyncImage(
@@ -293,7 +334,10 @@ fun AddExerciseScreen(
                 onValueChange = { videoResName = it },
                 label = { Text(stringResource(R.string.video_res)) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("e.g. running") }
+                placeholder = { Text("e.g. running") },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.ex_video_res_desc))
+                }
             )
 
             // Video Picker Button
@@ -302,7 +346,14 @@ fun AddExerciseScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = stringResource(R.string.external_video), style = MaterialTheme.typography.labelLarge)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = stringResource(R.string.external_video), style = MaterialTheme.typography.labelLarge)
+                        FieldExplanation(explanation = stringResource(R.string.ex_external_media_desc))
+                    }
                     Spacer(Modifier.height(8.dp))
                     if (selectedVideoUri != null) {
                         Text(

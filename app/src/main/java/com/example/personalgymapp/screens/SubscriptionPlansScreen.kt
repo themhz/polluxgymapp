@@ -5,9 +5,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Subscriptions
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -27,12 +28,19 @@ fun SubscriptionPlansScreen(
     onPlanSelected: (Int) -> Unit = {},
     onBackClick: () -> Unit
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+
+    val filteredPlans = plans.filter { plan ->
+        plan.name.contains(searchQuery, ignoreCase = true) ||
+        plan.description.contains(searchQuery, ignoreCase = true)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { 
                     Text(
-                        if (isSelectionMode) "Select Plan Template" 
+                        if (isSelectionMode) stringResource(R.string.select_plan_template)
                         else stringResource(R.string.subscription_plans)
                     ) 
                 },
@@ -51,38 +59,58 @@ fun SubscriptionPlansScreen(
         floatingActionButton = {
             if (!isSelectionMode) {
                 AddActionFab(
-                    label = "Add Plan",
+                    label = stringResource(R.string.add_plan),
                     onClick = onAddPlanClick
                 )
             }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
-        if (plans.isEmpty()) {
-            Box(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            // Search Box
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text(stringResource(R.string.search)) },
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "No subscription plans yet", color = MaterialTheme.colorScheme.tertiary)
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
+                    .fillMaxWidth()
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(plans) { plan ->
-                    SubscriptionPlanCard(
-                        plan = plan,
-                        onClick = { 
-                            if (isSelectionMode) onPlanSelected(plan.id)
-                            else onPlanClick(plan.id)
-                        }
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                singleLine = true,
+                placeholder = { Text(stringResource(R.string.search_exercises)) } // Using existing related string for hint
+            )
+
+            if (filteredPlans.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (plans.isEmpty()) stringResource(R.string.no_subscription_plans) 
+                               else stringResource(R.string.no_matching_plans),
+                        color = MaterialTheme.colorScheme.tertiary
                     )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredPlans) { plan ->
+                        SubscriptionPlanCard(
+                            plan = plan,
+                            onClick = { 
+                                if (isSelectionMode) onPlanSelected(plan.id)
+                                else onPlanClick(plan.id)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -120,7 +148,7 @@ fun SubscriptionPlanCard(plan: SubscriptionPlanEntity, onClick: () -> Unit) {
                     Text(text = plan.description, style = MaterialTheme.typography.bodyMedium)
                 }
                 Text(
-                    text = "${plan.durationDays} days",
+                    text = stringResource(R.string.days_count, plan.durationDays),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.tertiary
                 )

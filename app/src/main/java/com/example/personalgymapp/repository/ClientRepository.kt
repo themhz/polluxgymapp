@@ -73,4 +73,15 @@ class ClientRepository(
     suspend fun insertSubscriptionPlan(plan: SubscriptionPlanEntity) = subscriptionPlanDao.insertSubscriptionPlan(plan)
     suspend fun updateSubscriptionPlan(plan: SubscriptionPlanEntity) = subscriptionPlanDao.updateSubscriptionPlan(plan)
     suspend fun deleteSubscriptionPlan(plan: SubscriptionPlanEntity) = subscriptionPlanDao.deleteSubscriptionPlan(plan)
+
+    suspend fun clearAllData() {
+        clientDao.clearTable()
+        subscriptionDao.clearTable()
+        paymentDao.clearTable()
+        exerciseDao.clearTable()
+        workoutPlanDao.clearTable()
+        trainingSessionDao.clearTable()
+        sessionResultDao.clearTable()
+        subscriptionPlanDao.clearTable()
+    }
 }

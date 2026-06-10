@@ -20,4 +20,7 @@ interface ClientDao {
 
     @Delete
     suspend fun deleteClient(client: ClientEntity)
+
+    @Query("DELETE FROM clients")
+    suspend fun clearTable()
 }

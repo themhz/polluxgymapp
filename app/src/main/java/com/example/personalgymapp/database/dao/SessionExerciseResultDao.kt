@@ -14,4 +14,7 @@ interface SessionExerciseResultDao {
 
     @Delete
     suspend fun deleteResult(result: SessionExerciseResult)
+
+    @Query("DELETE FROM session_exercise_results")
+    suspend fun clearTable()
 }

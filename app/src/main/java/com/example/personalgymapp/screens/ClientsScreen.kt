@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -42,7 +43,7 @@ fun ClientsScreen(
 
     val filteredClients = clients.filter { client ->
         val matchesSearch = client.name.contains(searchQuery, ignoreCase = true)
-        val planName = subscriptionPlans.find { it.id == client.subscriptionPlanId }?.name ?: "No Plan"
+        val planName = subscriptionPlans.find { it.id == client.subscriptionPlanId }?.name ?: stringResource(R.string.no_plan)
         val matchesPlan = selectedPlanFilter == "All Plans" || planName == selectedPlanFilter
         matchesSearch && matchesPlan
     }
@@ -109,8 +110,9 @@ fun ClientsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Box(modifier = Modifier.fillMaxWidth()) {
+                val filterLabel = if (selectedPlanFilter == "All Plans") stringResource(R.string.all_plans) else selectedPlanFilter
                 OutlinedTextField(
-                    value = selectedPlanFilter,
+                    value = filterLabel,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.filter_by_plan)) },
@@ -167,7 +169,7 @@ fun ClientsScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(filteredClients) { client ->
-                        val planName = subscriptionPlans.find { it.id == client.subscriptionPlanId }?.name ?: "No Plan"
+                        val planName = subscriptionPlans.find { it.id == client.subscriptionPlanId }?.name ?: stringResource(R.string.no_plan)
                         ClientCard(
                             client = client,
                             planName = planName,
@@ -216,7 +218,7 @@ fun ClientCard(client: ClientEntity, planName: String, onClick: () -> Unit) {
                 Text(
                     text = stringResource(R.string.client_plan, planName),
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = Color(0xFF008080)
                 )
                 Text(
                     text = client.goal,
@@ -235,8 +237,13 @@ fun ClientCard(client: ClientEntity, planName: String, onClick: () -> Unit) {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.tertiary
                     )
+                    val nextSessionText = if (client.nextSession == "Not scheduled") {
+                        stringResource(R.string.not_scheduled)
+                    } else {
+                        client.nextSession
+                    }
                     Text(
-                        text = stringResource(R.string.next_session, client.nextSession),
+                        text = stringResource(R.string.next_session, nextSessionText),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.tertiary
                     )

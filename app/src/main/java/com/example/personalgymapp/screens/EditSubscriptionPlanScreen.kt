@@ -12,8 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.R
+import com.example.personalgymapp.components.FieldExplanation
 import com.example.personalgymapp.database.entity.SubscriptionPlanEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -26,7 +29,7 @@ fun EditSubscriptionPlanScreen(
 ) {
     if (plan == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Plan not found")
+            Text(stringResource(R.string.plan_not_found))
         }
         return
     }
@@ -47,11 +50,15 @@ fun EditSubscriptionPlanScreen(
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+    val nameRequiredError = stringResource(R.string.error_name_required)
+    val invalidPriceError = stringResource(R.string.error_invalid_price)
+    val invalidDurationError = stringResource(R.string.error_invalid_duration)
+
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Plan") },
-            text = { Text("Are you sure you want to delete this subscription plan?") },
+            title = { Text(stringResource(R.string.delete_plan)) },
+            text = { Text(stringResource(R.string.delete_plan_confirmation)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -60,12 +67,12 @@ fun EditSubscriptionPlanScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -74,15 +81,15 @@ fun EditSubscriptionPlanScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Subscription Plan") },
+                title = { Text(stringResource(R.string.edit_subscription_plan)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showDeleteDialog = true }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = MaterialTheme.colorScheme.error)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -120,7 +127,7 @@ fun EditSubscriptionPlanScreen(
                     )
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        text = "Τροποποιήστε τα στοιχεία του πακέτου συνδρομής. Οι αλλαγές θα επηρεάσουν μόνο τις μελλοντικές αναθέσεις αυτού του πλάνου.",
+                        text = stringResource(R.string.edit_plan_info),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -130,62 +137,79 @@ fun EditSubscriptionPlanScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it; nameError = null },
-                label = { Text("Plan Name") },
+                label = { Text(stringResource(R.string.plan_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = nameError != null,
-                supportingText = { nameError?.let { Text(it) } }
+                supportingText = { nameError?.let { Text(it) } },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.plan_name_desc))
+                }
             )
 
             OutlinedTextField(
                 value = price,
                 onValueChange = { price = it; priceError = null },
-                label = { Text("Price (€)") },
+                label = { Text("${stringResource(R.string.price)} (€)") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 isError = priceError != null,
-                supportingText = { priceError?.let { Text(it) } }
+                supportingText = { priceError?.let { Text(it) } },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.plan_price_desc))
+                }
             )
 
-            Text(
-                text = "Plan Duration",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    selected = durationType == "Monthly",
-                    onClick = { durationType = "Monthly" },
-                    label = { Text("Monthly") },
-                    modifier = Modifier.weight(1f)
-                )
-                FilterChip(
-                    selected = durationType == "Days",
-                    onClick = { durationType = "Days" },
-                    label = { Text("Days") },
-                    modifier = Modifier.weight(1f)
-                )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.plan_duration),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    FieldExplanation(explanation = stringResource(R.string.plan_duration_type_desc))
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = durationType == "Monthly",
+                        onClick = { durationType = "Monthly" },
+                        label = { Text(stringResource(R.string.monthly)) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    FilterChip(
+                        selected = durationType == "Days",
+                        onClick = { durationType = "Days" },
+                        label = { Text(stringResource(R.string.days)) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             OutlinedTextField(
                 value = durationValue,
                 onValueChange = { durationValue = it; durationError = null },
-                label = { Text(if (durationType == "Monthly") "Number of Months" else "Number of Days") },
+                label = { Text(if (durationType == "Monthly") stringResource(R.string.number_of_months) else stringResource(R.string.number_of_days)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 isError = durationError != null,
-                supportingText = { durationError?.let { Text(it) } }
+                supportingText = { durationError?.let { Text(it) } },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.plan_duration_value_desc))
+                }
             )
 
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Description (Optional)") },
+                label = { Text(stringResource(R.string.description_optional)) },
                 modifier = Modifier.fillMaxWidth(),
-                minLines = 3
+                minLines = 3,
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.plan_description_desc))
+                }
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -194,17 +218,17 @@ fun EditSubscriptionPlanScreen(
                 onClick = {
                     var isValid = true
                     if (name.isBlank()) {
-                        nameError = "Name is required"
+                        nameError = nameRequiredError
                         isValid = false
                     }
                     val priceValue = price.toDoubleOrNull()
                     if (priceValue == null) {
-                        priceError = "Invalid price"
+                        priceError = invalidPriceError
                         isValid = false
                     }
                     val durationInt = durationValue.toIntOrNull()
                     if (durationInt == null || durationInt <= 0) {
-                        durationError = "Invalid duration"
+                        durationError = invalidDurationError
                         isValid = false
                     }
 
@@ -222,7 +246,7 @@ fun EditSubscriptionPlanScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save Changes")
+                Text(stringResource(R.string.save_changes))
             }
         }
     }

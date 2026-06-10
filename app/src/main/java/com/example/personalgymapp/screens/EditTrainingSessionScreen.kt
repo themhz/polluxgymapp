@@ -18,7 +18,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.personalgymapp.R
 import com.example.personalgymapp.components.FieldExplanation
-import com.example.personalgymapp.database.entity.ClientEntity
 import com.example.personalgymapp.model.TrainingSession
 import com.example.personalgymapp.model.WorkoutPlan
 import java.text.SimpleDateFormat
@@ -28,36 +27,54 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddTrainingSessionScreen(
-    clients: List<ClientEntity>,
+fun EditTrainingSessionScreen(
+    session: TrainingSession?,
     workoutPlans: List<WorkoutPlan>,
     onSaveTrainingSession: (TrainingSession) -> Unit,
     onBackClick: () -> Unit
 ) {
-    var selectedClient by remember { mutableStateOf<ClientEntity?>(null) }
-    var selectedWorkoutPlan by remember { mutableStateOf<WorkoutPlan?>(null) }
-    var date by remember { mutableStateOf(SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())) }
-    var time by remember { mutableStateOf("10:00 AM") }
-    var duration by remember { mutableStateOf("60") }
-    var sessionType by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("Scheduled") }
-    var notes by remember { mutableStateOf("") }
+    if (session == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(stringResource(R.string.session_not_found))
+        }
+        return
+    }
 
-    var clientError by remember { mutableStateOf<String?>(null) }
+    var date by remember { mutableStateOf(session.date) }
+    var time by remember { mutableStateOf(session.time) }
+    var duration by remember { mutableStateOf(session.durationMinutes.toString()) }
+    var sessionType by remember { mutableStateOf(session.sessionType) }
+    var status by remember { mutableStateOf(session.status) }
+    var notes by remember { mutableStateOf(session.notes) }
+    var selectedWorkoutPlanId by remember { mutableStateOf(session.workoutPlanId) }
+
     var timeError by remember { mutableStateOf<String?>(null) }
     var durationError by remember { mutableStateOf<String?>(null) }
     var sessionTypeError by remember { mutableStateOf<String?>(null) }
 
-    val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = try { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(session.date)?.time } catch (e: Exception) { null }
+    )
     var showDatePicker by remember { mutableStateOf(false) }
 
-    val timePickerState = rememberTimePickerState(initialHour = 10, initialMinute = 0)
+    // Parsing time to set initial picker state
+    val initialCal = Calendar.getInstance().apply {
+        try {
+            val parsedDate = SimpleDateFormat("hh:mm a", Locale.getDefault()).parse(session.time)
+            if (parsedDate != null) {
+                this.time = parsedDate
+            }
+        } catch (e: Exception) {}
+    }
+    val timePickerState = rememberTimePickerState(
+        initialHour = initialCal.get(Calendar.HOUR_OF_DAY),
+        initialMinute = initialCal.get(Calendar.MINUTE)
+    )
     var showTimePicker by remember { mutableStateOf(false) }
 
     val okText = stringResource(R.string.ok)
     val cancelText = stringResource(R.string.cancel)
     
-    val selectClientError = stringResource(R.string.error_select_client)
     val timeRequiredError = stringResource(R.string.error_time_required)
     val enterDurationError = stringResource(R.string.error_enter_duration)
     val sessionTypeRequiredError = stringResource(R.string.error_session_type_required)
@@ -119,7 +136,7 @@ fun AddTrainingSessionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.add_session)) },
+                title = { Text(stringResource(R.string.edit_session)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = cancelText)
@@ -142,43 +159,15 @@ fun AddTrainingSessionScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Client Selection
-            var expandedClient by remember { mutableStateOf(false) }
-            ExposedDropdownMenuBox(
-                expanded = expandedClient,
-                onExpandedChange = { expandedClient = !expandedClient }
-            ) {
-                OutlinedTextField(
-                    value = selectedClient?.name ?: "",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.select_client)) },
-                    trailingIcon = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            FieldExplanation(explanation = stringResource(R.string.ts_client_desc))
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedClient)
-                        }
-                    },
-                    modifier = Modifier.menuAnchor().fillMaxWidth(),
-                    isError = clientError != null,
-                    supportingText = { clientError?.let { Text(it) } }
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedClient,
-                    onDismissRequest = { expandedClient = false }
-                ) {
-                    clients.forEach { client ->
-                        DropdownMenuItem(
-                            text = { Text(client.name) },
-                            onClick = {
-                                selectedClient = client
-                                expandedClient = false
-                                clientError = null
-                            }
-                        )
-                    }
-                }
-            }
+            // Client Name (Read-only in edit)
+            OutlinedTextField(
+                value = session.clientName,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(stringResource(R.string.client)) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = false
+            )
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
@@ -259,8 +248,9 @@ fun AddTrainingSessionScreen(
                 expanded = expandedPlan,
                 onExpandedChange = { expandedPlan = !expandedPlan }
             ) {
+                val selectedPlanName = workoutPlans.find { it.id == selectedWorkoutPlanId }?.name ?: stringResource(R.string.no_workout_plan)
                 OutlinedTextField(
-                    value = selectedWorkoutPlan?.name ?: stringResource(R.string.no_workout_plan),
+                    value = selectedPlanName,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.workout_plan_optional)) },
@@ -279,7 +269,7 @@ fun AddTrainingSessionScreen(
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.no_workout_plan)) },
                         onClick = {
-                            selectedWorkoutPlan = null
+                            selectedWorkoutPlanId = null
                             expandedPlan = false
                         }
                     )
@@ -287,7 +277,7 @@ fun AddTrainingSessionScreen(
                         DropdownMenuItem(
                             text = { Text(plan.name) },
                             onClick = {
-                                selectedWorkoutPlan = plan
+                                selectedWorkoutPlanId = plan.id
                                 expandedPlan = false
                             }
                         )
@@ -330,10 +320,6 @@ fun AddTrainingSessionScreen(
             Button(
                 onClick = {
                     var isValid = true
-                    if (selectedClient == null) {
-                        clientError = selectClientError
-                        isValid = false
-                    }
                     if (time.isBlank()) {
                         timeError = timeRequiredError
                         isValid = false
@@ -350,24 +336,21 @@ fun AddTrainingSessionScreen(
 
                     if (isValid) {
                         onSaveTrainingSession(
-                            TrainingSession(
-                                id = 0, // Assigned in Navigation
-                                clientId = selectedClient!!.id,
-                                clientName = selectedClient!!.name,
+                            session.copy(
                                 date = date,
                                 time = time,
                                 durationMinutes = durationInt ?: 0,
                                 sessionType = sessionType,
                                 status = status,
                                 notes = notes,
-                                workoutPlanId = selectedWorkoutPlan?.id
+                                workoutPlanId = selectedWorkoutPlanId
                             )
                         )
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.save_session))
+                Text(stringResource(R.string.save_changes))
             }
         }
     }

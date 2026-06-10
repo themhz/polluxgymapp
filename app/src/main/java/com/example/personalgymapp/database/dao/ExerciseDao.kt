@@ -17,4 +17,7 @@ interface ExerciseDao {
 
     @Delete
     suspend fun deleteExercise(exercise: Exercise)
+
+    @Query("DELETE FROM exercises")
+    suspend fun clearTable()
 }

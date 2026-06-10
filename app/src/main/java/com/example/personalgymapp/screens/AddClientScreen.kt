@@ -10,7 +10,10 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.R
+import com.example.personalgymapp.components.FieldExplanation
 import com.example.personalgymapp.database.entity.ClientEntity
 import com.example.personalgymapp.database.entity.SubscriptionPlanEntity
 import java.text.SimpleDateFormat
@@ -41,6 +44,11 @@ fun AddClientScreen(
 
     var expandedPlans by remember { mutableStateOf(false) }
 
+    val nameRequiredError = stringResource(R.string.error_name_required)
+    val goalRequiredError = stringResource(R.string.error_goal_required)
+    val birthDateRequiredError = stringResource(R.string.error_birthdate_required)
+    val emailRequiredError = stringResource(R.string.error_email_required)
+
     if (showBirthDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showBirthDatePicker = false },
@@ -52,12 +60,12 @@ fun AddClientScreen(
                     showBirthDatePicker = false
                     birthDateError = null
                 }) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showBirthDatePicker = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         ) {
@@ -68,10 +76,10 @@ fun AddClientScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add Client") },
+                title = { Text(stringResource(R.string.add_client)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -94,37 +102,47 @@ fun AddClientScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it; nameError = null },
-                label = { Text("Name") },
+                label = { Text(stringResource(R.string.client)) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = nameError != null,
-                supportingText = { nameError?.let { Text(it) } }
+                supportingText = { nameError?.let { Text(it) } },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.client_name_desc))
+                }
             )
 
             OutlinedTextField(
                 value = goal,
                 onValueChange = { goal = it; goalError = null },
-                label = { Text("Goal") },
+                label = { Text(stringResource(R.string.client_goal)) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = goalError != null,
-                supportingText = { goalError?.let { Text(it) } }
+                supportingText = { goalError?.let { Text(it) } },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.client_goal_desc))
+                }
             )
 
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = birthDate?.let { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(it) } ?: "",
                     onValueChange = { },
-                    label = { Text("Birth Date") },
+                    label = { Text(stringResource(R.string.client_birthdate)) },
                     modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
                     isError = birthDateError != null,
                     supportingText = { birthDateError?.let { Text(it) } },
                     trailingIcon = {
-                        Icon(Icons.Default.DateRange, contentDescription = "Select Birth Date")
+                        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                            FieldExplanation(explanation = stringResource(R.string.client_birthdate_desc))
+                            Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.client_birthdate))
+                        }
                     }
                 )
                 Box(
                     modifier = Modifier
                         .matchParentSize()
+                        .padding(end = 48.dp) // Leave space for the icons
                         .clickable { showBirthDatePicker = true }
                 )
             }
@@ -132,17 +150,23 @@ fun AddClientScreen(
             OutlinedTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = { Text("Phone (Optional)") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text(stringResource(R.string.phone_optional)) },
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.client_phone_desc))
+                }
             )
 
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it; emailError = null },
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.client_email)) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = emailError != null,
-                supportingText = { emailError?.let { Text(it) } }
+                supportingText = { emailError?.let { Text(it) } },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.client_email_desc))
+                }
             )
 
             // Subscription Plan Dropdown
@@ -152,11 +176,16 @@ fun AddClientScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(
-                    value = subscriptionPlans.find { it.id == selectedPlanId }?.name ?: "Select Subscription Plan",
+                    value = subscriptionPlans.find { it.id == selectedPlanId }?.name ?: stringResource(R.string.select_subscription_plan),
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Subscription Plan") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPlans) },
+                    label = { Text(stringResource(R.string.subscription_plans)) },
+                    trailingIcon = {
+                        Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                            FieldExplanation(explanation = stringResource(R.string.client_plan_selection_desc))
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPlans)
+                        }
+                    },
                     modifier = Modifier.menuAnchor().fillMaxWidth(),
                     colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
                 )
@@ -182,19 +211,19 @@ fun AddClientScreen(
                 onClick = {
                     var isValid = true
                     if (name.isBlank()) {
-                        nameError = "Name is required"
+                        nameError = nameRequiredError
                         isValid = false
                     }
                     if (goal.isBlank()) {
-                        goalError = "Goal is required"
+                        goalError = goalRequiredError
                         isValid = false
                     }
                     if (birthDate == null) {
-                        birthDateError = "Birth date is required"
+                        birthDateError = birthDateRequiredError
                         isValid = false
                     }
                     if (email.isBlank()) {
-                        emailError = "Email is required"
+                        emailError = emailRequiredError
                         isValid = false
                     }
 
@@ -214,7 +243,7 @@ fun AddClientScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save Client")
+                Text(stringResource(R.string.save_client))
             }
         }
     }

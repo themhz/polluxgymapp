@@ -21,11 +21,27 @@
     <string name="manage_clients">Διαχείριση των πελατών σας</string>
     <string name="search_by_name">Αναζήτηση βάσει ονόματος</string>
     <string name="filter_by_plan">Φιλτράρισμα βάσει Συνδρομής</string>
-    <string name="all_plans">Όλα τα Προγράμματα</string>
+    <string name="all_plans">Επιλογή Συνδρομής</string>
     <string name="no_clients_yet">Δεν υπάρχουν ακόμα πελάτες</string>
     <string name="no_matching_clients">Δεν βρέθηκαν πελάτες</string>
+    <string name="add">Προσθήκη</string>
     <string name="add_client">Προσθήκη Πελάτη</string>
     <string name="edit_client">Επεξεργασία Πελάτη</string>
+    <string name="edit_subscription_plan">Επεξεργασία Προγράμματος Συνδρομής</string>
+    <string name="plan_not_found">Το πρόγραμμα δεν βρέθηκε</string>
+    <string name="delete_plan">Διαγραφή Προγράμματος</string>
+    <string name="delete_plan_confirmation">Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτό το πρόγραμμα συνδρομής;</string>
+    <string name="edit_plan_info">Τροποποιήστε τα στοιχεία του πακέτου συνδρομής. Οι αλλαγές θα επηρεάσουν μόνο τις μελλοντικές αναθέσεις αυτού του πλάνου.</string>
+    <string name="plan_name">Όνομα Προγράμματος</string>
+    <string name="plan_duration">Διάρκεια Προγράμματος</string>
+    <string name="monthly">Μηνιαίο</string>
+    <string name="days">Ημέρες</string>
+    <string name="number_of_months">Αριθμός Μηνών</string>
+    <string name="number_of_days">Αριθμός Ημερών</string>
+    <string name="description_optional">Περιγραφή (Προαιρετικό)</string>
+    <string name="save_changes">Αποθήκευση Αλλαγών</string>
+    <string name="error_invalid_price">Μη έγκυρη τιμή</string>
+    <string name="error_invalid_duration">Μη έγκυρη διάρκεια</string>
     <string name="delete_client">Διαγραφή Πελάτη</string>
     <string name="delete_client_confirmation">Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτόν τον πελάτη; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
     <string name="cancel">Ακύρωση</string>
@@ -33,22 +49,85 @@
     <string name="client_plan">Πρόγραμμα: %s</string>
     <string name="sessions_completed">Συνεδρίες: %d</string>
     <string name="next_session">Επόμενη: %s</string>
+    <string name="not_scheduled">Δεν έχει προγραμματιστεί</string>
+
+    <!-- Client Properties -->
+    <string name="client_goal">Στόχος</string>
+    <string name="client_birthdate">Ημερομηνία Γέννησης</string>
+    <string name="client_phone">Τηλέφωνο</string>
+    <string name="client_email">Email</string>
+    <string name="next_session_label">Επόμενη Συνεδρία</string>
+    <string name="client_name_desc">Εισαγάγετε το πλήρες όνομα του πελάτη σας. Με αυτό το όνομα θα αναγνωρίζεται σε όλη την εφαρμογή.</string>
+    <string name="client_goal_desc">Ο κύριος στόχος φυσικής κατάστασης του πελάτη (π.χ. "Απώλεια βάρους", "Μυϊκή ενδυνάμωση"). Σας βοηθά να προσαρμόσετε τις προπονήσεις του.</string>
+    <string name="client_birthdate_desc">Χρησιμοποιείται για την παρακολούθηση της ηλικίας του πελάτη και για τον εορτασμό των γενεθλίων του.</string>
+    <string name="client_phone_desc">Κύριος αριθμός τηλεφώνου. Χρήσιμο για γρήγορη επικοινωνία ή ενημερώσεις προγράμματος.</string>
+    <string name="client_email_desc">Διεύθυνση email για ψηφιακή επικοινωνία, αναφορές προπόνησης ή σύνδεση λογαριασμού.</string>
+    <string name="client_next_session_desc">Η ημερομηνία της επόμενης προγραμματισμένης συνεδρίας. Ενημερώνεται αυτόματα όταν προγραμματίζετε συνεδρίες στο ημερολόγιο.</string>
+    <string name="client_plan_selection_desc">Αναθέστε ένα πρόγραμμα συνδρομής στον πελάτη. Αυτό καθορίζει τον κύκλο χρέωσης και το υπόλοιπό του.</string>
 
     <!-- Calendar Screen -->
     <string name="schedule_manage_sessions">Προγραμματισμός και διαχείριση συνεδριών</string>
+    <string name="filter_by_status">Φιλτράρισμα βάσει Κατάστασης</string>
     <string name="status_all">Όλες</string>
     <string name="status_scheduled">Προγραμματισμένες</string>
     <string name="status_completed">Ολοκληρωμένες</string>
     <string name="status_cancelled">Ακυρωμένες</string>
     <string name="add_session">Προσθήκη Συνεδρίας</string>
+    <string name="select_client">Επιλογή Πελάτη</string>
+    <string name="session_type">Τύπος Συνεδρίας</string>
+    <string name="session_type_hint">π.χ. Ενδυνάμωση, Καρδιοαναπνευστική</string>
+    <string name="no_workout_plan">Χωρίς πρόγραμμα προπόνησης</string>
+    <string name="workout_plan_optional">Πρόγραμμα Προπόνησης (Προαιρετικό)</string>
+    <string name="save_session">Αποθήκευση Συνεδρίας</string>
+    <string name="error_select_client">Παρακαλώ επιλέξτε έναν πελάτη</string>
+    <string name="error_enter_duration">Εισαγάγετε μια έγκυρη διάρκεια</string>
+    <string name="error_session_type_required">Ο τύπος συνεδρίας είναι υποχρεωτικός</string>
+
+    <!-- Training Session Explanations -->
+    <string name="ts_client_desc">Επιλέξτε τον πελάτη για τον οποίο προορίζεται αυτή η συνεδρία. Αυτό συνδέει την προπόνηση με το προφίλ του.</string>
+    <string name="ts_date_desc">Η ημέρα κατά την οποία έχει προγραμματιστεί να πραγματοποιηθεί η συνεδρία προπόνησης.</string>
+    <string name="ts_time_desc">Η ακριβής ώρα έναρξης της συνεδρίας προπόνησης.</string>
+    <string name="ts_duration_desc">Η προγραμματισμένη διάρκεια της συνεδρίας σε λεπτά. Αυτό σας βοηθά να διαχειριστείτε το καθημερινό σας πρόγραμμα.</string>
+    <string name="ts_type_desc">Η κύρια εστίαση ή κατηγορία της συνεδρίας (π.χ. "Πόδια", "Λειτουργική Προπόνηση").</string>
+    <string name="ts_plan_desc">Προαιρετικά συνδέστε ένα έτοιμο πρόγραμμα προπόνησης. Αυτό επιτρέπει την παρακολούθηση των ασκήσεων βήμα προς βήμα κατά τη διάρκεια της συνεδρίας.</string>
+    <string name="ts_status_desc">Τρέχουσα κατάσταση: Προγραμματισμένη (επικείμενη), Ολοκληρωμένη ή Ακυρωμένη.</string>
+    <string name="ts_notes_desc">Τυχόν ειδικές οδηγίες, αιτήματα πελατών ή υπενθυμίσεις για τη συγκεκριμένη συνεδρία.</string>
     <string name="no_sessions_yet">Δεν υπάρχουν ακόμα συνεδρίες</string>
     <string name="no_sessions_filtered">Δεν βρέθηκαν %s συνεδρίες</string>
 
     <!-- Workout Plans Screen -->
     <string name="manage_workout_plans">Δημιουργία και διαχείριση προγραμμάτων προπόνησης</string>
     <string name="no_workout_plans_yet">Δεν υπάρχουν ακόμα προγράμματα</string>
+    <string name="search">Αναζήτηση</string>
     <string name="no_matching_plans">Δεν βρέθηκαν προγράμματα</string>
-    <string name="create_workout">Δημιουργία Προπόνησης</string>
+    <string name="create_workout_plan">Δημιουργία Προγράμματος Προπόνησης</string>
+    <string name="plan_name_label">Όνομα Προγράμματος</string>
+    <string name="plan_notes_label">Σημειώσεις (Προαιρετικό)</string>
+    <string name="exercises">Ασκήσεις</string>
+    <string name="add_exercise_to_plan">Προσθήκη Άσκησης</string>
+    <string name="save_workout_plan">Αποθήκευση Προγράμματος</string>
+    <string name="error_plan_name_required">Το όνομα του προγράμματος είναι υποχρεωτικό</string>
+    <string name="error_at_least_one_exercise">Προσθέστε τουλάχιστον μία άσκηση</string>
+    <string name="reps">Επαναλήψεις</string>
+    <string name="sets">Σετ</string>
+    <string name="rounds">Γύροι</string>
+    <string name="duration_s">Διάρκεια (δ)</string>
+    <string name="rest_s">Ξεκούραση (δ)</string>
+    <string name="countdown">Αντίστροφη μέτρηση</string>
+    <string name="countup">Κανονική μέτρηση</string>
+
+    <!-- Workout Plan Explanations -->
+    <string name="wp_name_desc">Δώστε ένα περιγραφικό όνομα στο πρόγραμμα (π.χ. "Δύναμη Άνω Μέρους" ή "Καρδιοαναπνευστική Παρασκευής"). Αυτό το όνομα θα εμφανίζεται όταν συνδέετε ένα πρόγραμμα με μια συνεδρία.</string>
+    <string name="wp_notes_desc">Προαιρετικές σημειώσεις ή οδηγίες για το συνολικό πρόγραμμα. Αυτές θα μπορούσαν να περιλαμβάνουν συμβουλές προθέρμανσης ή το επιδιωκόμενο επίπεδο έντασης.</string>
+    <string name="wp_exercises_desc">Μια λίστα με τις ασκήσεις που απαρτίζουν αυτή την προπόνηση. Μπορείτε να προσθέσετε, να αφαιρέσετε και να ρυθμίσετε σετ, επαναλήψεις και ξεκούραση για την καθεμία.</string>
+    <string name="wp_add_ex_desc">Αναζητήστε μια άσκηση από τη βιβλιοθήκη σας και ορίστε τις παραμέτρους της, όπως σετ, επαναλήψεις ή διάρκεια για αυτό το συγκεκριμένο πρόγραμμα.</string>
+    <string name="wp_ex_type_desc">Επιλέξτε "Επαναλήψεις" για ασκήσεις που βασίζονται σε επαναλήψεις (όπως push-ups) ή "Χρόνο" για ασκήσεις που βασίζονται στη διάρκεια (όπως σανίδα).</string>
+    <string name="wp_timer_type_desc">Για ασκήσεις βάσει χρόνου, επιλέξτε "Αντίστροφη μέτρηση" για να βλέπετε τον υπολειπόμενο χρόνο ή "Κανονική μέτρηση" για να βλέπετε τον χρόνο που πέρασε.</string>
+    <string name="wp_sets_desc">Ο αριθμός των φορών που θα εκτελέσετε την άσκηση. Στις ασκήσεις βάσει χρόνου, αυτό συχνά ονομάζεται "Γύροι".</string>
+    <string name="wp_reps_val_desc">Ο αριθμός των επαναλήψεων ανά σετ. Αφήστε το στο 0 εάν πρόκειται για άσκηση βάσει χρόνου.</string>
+    <string name="wp_duration_desc">Ο στόχος χρόνου σε δευτερόλεπτα για κάθε σετ ή γύρο μιας άσκησης βάσει χρόνου.</string>
+    <string name="wp_rest_desc">Ο χρόνος ανάπαυσης σε δευτερόλεπτα μεταξύ κάθε σετ ή γύρου. Η αποκατάσταση είναι το κλειδί για τη διατήρηση της απόδοσης!</string>
+
     <string name="library">Βιβλιοθήκη </string>
     <string name="exercises_count">%d Ασκήσεις</string>
 
@@ -134,9 +213,69 @@
     <string name="select_video">Επιλογή Βίντεο από τη Συσκευή</string>
     <string name="change_video">Αλλαγή Βίντεο</string>
     <string name="save_exercise">Αποθήκευση Άσκησης</string>
+    <!-- Exercise Explanations -->
+    <string name="ex_name_desc">Το κοινό όνομα της άσκησης (π.χ. "Πιέσεις Πάγκου"). Με αυτό το όνομα θα την αναζητάτε όταν δημιουργείτε προγράμματα προπόνησης.</string>
+    <string name="ex_muscle_group_desc">Η κύρια μυϊκή ομάδα που στοχεύει αυτή η άσκηση. Σας βοηθά να φιλτράρετε και να ισορροπείτε τα προγράμματά σας.</string>
+    <string name="ex_equipment_desc">Τα εργαλεία που απαιτούνται για την άσκηση (π.χ. "Αλτήρες", "Μπάρα" ή "Κανένα" για ασκήσεις σωματικού βάρους).</string>
+    <string name="ex_difficulty_desc">Πόσο απαιτητική είναι η άσκηση. Χρήσιμο για την επιλογή κατάλληλων ασκήσεων ανάλογα με το επίπεδο του πελάτη.</string>
+    <string name="ex_instructions_desc">Οδηγίες βήμα προς βήμα για το πώς να εκτελέσετε την άσκηση με ασφάλεια και αποτελεσματικότητα.</string>
+    <string name="ex_focus_area_desc">Η γενική περιοχή του σώματος που στοχεύεται (Άνω, Κάτω ή Όλο το Σώμα).</string>
+    <string name="ex_training_type_desc">Η φύση της άσκησης: Αντίσταση (δύναμη), Καρδιοαναπνευστική (αντοχή) ή Κινητικότητα (ευλυγισία).</string>
+    <string name="ex_image_res_desc">Το όνομα ενός εσωτερικού αρχείου εικόνας της εφαρμογής που σχετίζεται με αυτήν την άσκηση (τεχνικό πεδίο).</string>
+    <string name="ex_video_res_desc">Το όνομα ενός εσωτερικού αρχείου βίντεο της εφαρμογής που σχετίζεται με αυτήν την άσκηση (τεχνικό πεδίο).</string>
+    <string name="ex_external_media_desc">Ανεβάστε δικές σας εικόνες ή βίντεο από τη συσκευή σας για να δείξετε οπτικά την άσκηση στους πελάτες σας.</string>
+
+    <string name="add_subscription_plan">Προσθήκη Προγράμματος Συνδρομής</string>
+    <string name="save_plan">Αποθήκευση Προγράμματος</string>
+    <string name="plan_name_hint">π.χ. Μηνιαίο Silver</string>
+    <string name="plan_name_desc">Το όνομα του πακέτου συνδρομής. Αυτό θα βλέπετε εσείς και οι πελάτες σας κατά την επιλογή προγράμματος.</string>
+    <string name="plan_price_desc">Το κόστος του προγράμματος. Αυτό το ποσό θα προτείνεται αυτόματα όταν δημιουργείτε μια νέα συνδρομή για έναν πελάτη.</string>
+    <string name="plan_duration_type_desc">Επιλέξτε τη μονάδα μέτρησης χρόνου. Η μηνιαία επιλογή είναι ιδανική για σταθερά προγράμματα, ενώ οι ημέρες επιτρέπουν ειδικές διάρκειες (π.χ. πάσο 10 ημερών).</string>
+    <string name="plan_duration_value_desc">Η πραγματική διάρκεια του προγράμματος. Για παράδειγμα, αν επιλέξατε "Μηνιαίο", βάλτε "1" για έναν μήνα. Αυτό ορίζει την ημερομηνία της επόμενης πληρωμής.</string>
+    <string name="plan_description_desc">Προαιρετικές λεπτομέρειες για τις παροχές (π.χ. "Περιλαμβάνει χρήση σάουνας"). Σας βοηθά να ξεχωρίζετε παρόμοια προγράμματα.</string>
+    <string name="add_plan_info">Εδώ δημιουργείτε τα πακέτα συνδρομών σας. Ορίστε το όνομα, την τιμή και τη διάρκεια. Αυτά τα πλάνα θα εμφανίζονται ως επιλογές όταν προσθέτετε μια νέα συνδρομή σε έναν πελάτη.</string>
     <string name="error_name_required">Το όνομα είναι υποχρεωτικό</string>
     <string name="error_mg_required">Η μυϊκή ομάδα είναι υποχρεωτική</string>
     <string name="error_instr_required">Οι οδηγίες είναι υποχρεωτικές</string>
+    <string name="error_goal_required">Ο στόχος είναι υποχρεωτικός</string>
+    <string name="error_birthdate_required">Η ημερομηνία γέννησης είναι υποχρεωτική</string>
+    <string name="error_email_required">Το email είναι υποχρεωτικό</string>
+    <string name="session_not_found">Η συνεδρία δεν βρέθηκε!</string>
+    <string name="edit_session">Επεξεργασία Συνεδρίας</string>
+    <string name="delete_session">Διαγραφή Συνεδρίας</string>
+    <string name="delete_session_confirm">Είστε βέβαιοι ότι θέλετε να διαγράψετε αυτή τη συνεδρία για τον/την %s;</string>
+    <string name="and_more_count">…και ακόμη %d</string>
+    <string name="error_time_required">Η ώρα είναι υποχρεωτική</string>
+    <string name="phone_optional">Τηλέφωνο (Προαιρετικό)</string>
+    <string name="select_subscription_plan">Επιλέξτε Πρόγραμμα Συνδρομής</string>
+    <string name="save_client">Αποθήκευση Πελάτη</string>
+    <string name="no_plan">Χωρίς Πρόγραμμα</string>
+    <string name="summary">Σύνοψη</string>
+    <string name="paid">Πληρωμένο</string>
+    <string name="pending">Εκκρεμεί</string>
+    <string name="overdue">Εκπρόθεσμο</string>
+    <string name="owes">Οφείλει: %s</string>
+    <string name="remaining_balance">Υπόλοιπο: %s</string>
+    <string name="assigned_plan_summary">Στον/Στην %1$s θα ανατεθεί το πρόγραμμα \"%2$s\" για %3$s.</string>
+    <string name="next_payment_due">Επόμενη Πληρωμή: %s</string>
+    <string name="no_active_subscription">Δεν βρέθηκε ενεργή συνδρομή.</string>
+    <string name="client_info">Πληροφορίες Πελάτη</string>
+    <string name="plan_details">Λεπτομέρειες Προγράμματος</string>
+    <string name="payment_schedule">Πληρωμή &amp; Πρόγραμμα</string>
+    <string name="select_template">Επιλέξτε πρότυπο</string>
+    <string name="display_name">Όνομα Εμφάνισης</string>
+    <string name="price">Τιμή</string>
+    <string name="paid_amount">Πληρωμένο Ποσό</string>
+    <string name="renewal_date">Ημερομηνία Ανανέωσης / Λήξης</string>
+    <string name="confirm_create_subscription">Επιβεβαίωση &amp; Δημιουργία Συνδρομής</string>
+    <string name="financial_overview">Οικονομική Επισκόπηση</string>
+    <string name="total_outstanding">Συνολικό Υπόλοιπο: %s</string>
+    <string name="no_subscriptions_found">Δεν βρέθηκαν συνδρομές</string>
+    <string name="due_date_label">Λήξη: %s</string>
+    <string name="add_plan">Προσθήκη Προγράμματος</string>
+    <string name="no_subscription_plans">Δεν υπάρχουν ακόμα προγράμματα συνδρομής</string>
+    <string name="select_plan_template">Επιλέξτε Πρότυπο Προγράμματος</string>
+    <string name="days_count">%d ημέρες</string>
 
     <!-- Payments -->
     <string name="payment_history">Ιστορικό Πληρωμών</string>
@@ -147,4 +286,20 @@
     <string name="notes_optional">Σημειώσεις (Προαιρετικό)</string>
     <string name="save_payment">Αποθήκευση Πληρωμής</string>
     <string name="no_payments_yet">Δεν έχουν καταγραφεί ακόμα πληρωμές</string>
+
+    <!-- Settings Screen -->
+    <string name="account_sync">Λογαριασμός &amp; Συγχρονισμός</string>
+    <string name="connected_as">Συνδεδεμένος ως</string>
+    <string name="disconnect">Αποσύνδεση</string>
+    <string name="google_account">Λογαριασμός Google</string>
+    <string name="connect_google_desc">Συνδέστε τον λογαριασμό σας Google για συγχρονισμό δεδομένων και ενεργοποίηση μελλοντικών λειτουργιών cloud.</string>
+    <string name="connect_with_google">Σύνδεση με Google</string>
+    <string name="google_signin_setup_msg">Η σύνδεση Google απαιτεί ID έργου Google Cloud. Ρυθμίστε τα κλειδιά στην επόμενη φάση.</string>
+
+    <!-- Reset Data -->
+    <string name="danger_zone">Επικίνδυνη Ζώνη</string>
+    <string name="reset_database">Επαναφορά Βάσης Δεδομένων</string>
+    <string name="reset_db_desc">Οριστική διαγραφή όλων των πελατών, προγραμμάτων και συνεδριών. Αυτή η ενέργεια δεν αναιρείται.</string>
+    <string name="reset_db_confirm_title">Διαγραφή Όλων των Δεδομένων;</string>
+    <string name="reset_db_confirm_msg">Είστε βέβαιοι ότι θέλετε να κάνετε πλήρη επαναφορά της βάσης; Όλες οι πληροφορίες σας θα χαθούν οριστικά.</string>
 </resources>

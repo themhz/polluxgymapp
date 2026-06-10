@@ -17,4 +17,7 @@ interface SubscriptionPlanDao {
 
     @Delete
     suspend fun deleteSubscriptionPlan(plan: SubscriptionPlanEntity)
+
+    @Query("DELETE FROM subscription_plans")
+    suspend fun clearTable()
 }

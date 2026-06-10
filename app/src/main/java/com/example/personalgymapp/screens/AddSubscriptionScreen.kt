@@ -135,7 +135,7 @@ fun AddSubscriptionScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             // Section 1: Client Info
-            SectionHeader(title = "Client Information", icon = Icons.Default.Person)
+            SectionHeader(title = stringResource(R.string.client_info), icon = Icons.Default.Person)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -147,10 +147,10 @@ fun AddSubscriptionScreen(
                         onExpandedChange = { expandedClient = !expandedClient }
                     ) {
                         OutlinedTextField(
-                            value = selectedClient?.name ?: "Select Client",
+                            value = selectedClient?.name ?: stringResource(R.string.client),
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Select Client") },
+                            label = { Text(stringResource(R.string.client)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedClient) },
                             modifier = Modifier.menuAnchor().fillMaxWidth(),
                             isError = clientError != null,
@@ -176,7 +176,7 @@ fun AddSubscriptionScreen(
             }
 
             // Section 2: Subscription Plan
-            SectionHeader(title = "Plan Details", icon = Icons.Default.Subscriptions)
+            SectionHeader(title = stringResource(R.string.plan_details), icon = Icons.Default.Subscriptions)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -184,10 +184,10 @@ fun AddSubscriptionScreen(
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Box(modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
-                            value = if (selectedPlan != null) "${selectedPlan!!.name} (€${selectedPlan!!.price})" else planName.ifBlank { "Select a template" },
+                            value = if (selectedPlan != null) "${selectedPlan!!.name} (€${selectedPlan!!.price})" else planName.ifBlank { stringResource(R.string.select_template) },
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Subscription Plan Template") },
+                            label = { Text(stringResource(R.string.subscription_plans)) },
                             trailingIcon = { Icon(Icons.Default.Subscriptions, contentDescription = null) },
                             modifier = Modifier.fillMaxWidth(),
                             enabled = false,
@@ -208,7 +208,7 @@ fun AddSubscriptionScreen(
                     OutlinedTextField(
                         value = planName,
                         onValueChange = { planName = it; planError = null },
-                        label = { Text("Display Name") },
+                        label = { Text(stringResource(R.string.display_name)) },
                         modifier = Modifier.fillMaxWidth(),
                         leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) }
                     )
@@ -216,7 +216,7 @@ fun AddSubscriptionScreen(
             }
 
             // Section 3: Payment & Dates
-            SectionHeader(title = "Payment & Schedule", icon = Icons.Default.Payments)
+            SectionHeader(title = stringResource(R.string.payment_schedule), icon = Icons.Default.Payments)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -226,7 +226,7 @@ fun AddSubscriptionScreen(
                         OutlinedTextField(
                             value = price,
                             onValueChange = { price = it; priceError = null },
-                            label = { Text("Price") },
+                            label = { Text(stringResource(R.string.price)) },
                             modifier = Modifier.weight(1f),
                             prefix = { Text("€") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -236,7 +236,7 @@ fun AddSubscriptionScreen(
                         OutlinedTextField(
                             value = totalPaid,
                             onValueChange = { totalPaid = it },
-                            label = { Text("Paid") },
+                            label = { Text(stringResource(R.string.paid_amount)) },
                             modifier = Modifier.weight(1f),
                             prefix = { Text("€") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -246,7 +246,7 @@ fun AddSubscriptionScreen(
                     OutlinedTextField(
                         value = dueDate,
                         onValueChange = { dueDate = it },
-                        label = { Text("Renewal / Due Date") },
+                        label = { Text(stringResource(R.string.renewal_date)) },
                         modifier = Modifier.fillMaxWidth(),
                         leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null) },
                         placeholder = { Text("YYYY-MM-DD") }
@@ -262,20 +262,20 @@ fun AddSubscriptionScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Summary",
+                            text = stringResource(R.string.summary),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "${selectedClient!!.name} will be assigned the \"$planName\" plan for €$price.",
+                            text = stringResource(R.string.assigned_plan_summary, selectedClient!!.name, planName, "€$price"),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         val p = price.toDoubleOrNull() ?: 0.0
                         val tp = totalPaid.toDoubleOrNull() ?: 0.0
                         if (tp < p) {
                             Text(
-                                text = "Remaining balance: €${String.format("%.2f", p - tp)}",
+                                text = stringResource(R.string.remaining_balance, "€${String.format("%.2f", p - tp)}"),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -325,7 +325,7 @@ fun AddSubscriptionScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text("Confirm & Create Subscription", modifier = Modifier.padding(8.dp))
+                Text(stringResource(R.string.confirm_create_subscription), modifier = Modifier.padding(8.dp))
             }
             
             Spacer(Modifier.height(24.dp))

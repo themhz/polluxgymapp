@@ -6,21 +6,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.personalgymapp.R
+import com.example.personalgymapp.viewmodel.ClientViewModel
 import com.example.personalgymapp.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
@@ -28,11 +24,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    clientViewModel: ClientViewModel,
     onBackClick: () -> Unit
 ) {
     val settings by viewModel.settings.collectAsState()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showResetDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -62,7 +60,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             // Google Authentication Section
-            SettingsGroup(title = "Account & Sync", icon = Icons.Default.Cloud) {
+            SettingsGroup(title = stringResource(R.string.account_sync), icon = Icons.Default.Cloud) {
                 if (settings.isGoogleConnected) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -71,34 +69,32 @@ fun SettingsScreen(
                         Icon(Icons.Default.AccountCircle, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
                         Spacer(Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(text = "Connected as", style = MaterialTheme.typography.labelSmall)
-                            Text(text = settings.googleAccountName ?: "Google Account", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                            Text(text = stringResource(R.string.connected_as), style = MaterialTheme.typography.labelSmall)
+                            Text(text = settings.googleAccountName ?: stringResource(R.string.google_account), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                         }
                         TextButton(onClick = { viewModel.disconnectGoogle() }) {
-                            Text("Disconnect", color = MaterialTheme.colorScheme.error)
+                            Text(stringResource(R.string.disconnect), color = MaterialTheme.colorScheme.error)
                         }
                     }
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        val setupMsg = stringResource(R.string.google_signin_setup_msg)
                         Text(
-                            text = "Connect your Google account to sync data and enable future cloud features.",
+                            text = stringResource(R.string.connect_google_desc),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(bottom = 12.dp)
                         )
                         Button(
                             onClick = {
-                                // Placeholder for actual Google Sign-In logic
-                                // This requires a Web Client ID from Google Cloud Console
                                 scope.launch {
-                                    snackbarHostState.showSnackbar("Google Sign-In requires a Google Cloud Project ID. Set up keys in the next phase.")
-                                    // Simulating successful connection for UI demonstration
+                                    snackbarHostState.showSnackbar(setupMsg)
                                     viewModel.connectGoogle("trainer.user@gmail.com")
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                         ) {
-                            Text("Connect with Google")
+                            Text(stringResource(R.string.connect_with_google))
                         }
                     }
                 }
@@ -193,7 +189,54 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            // Danger Zone - Reset Database
+            SettingsGroup(title = stringResource(R.string.danger_zone), icon = Icons.Default.Warning) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = stringResource(R.string.reset_db_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Button(
+                        onClick = { showResetDialog = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Icon(Icons.Default.DeleteForever, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.reset_database))
+                    }
+                }
+            }
         }
+    }
+
+    if (showResetDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetDialog = false },
+            title = { Text(stringResource(R.string.reset_db_confirm_title), color = MaterialTheme.colorScheme.error) },
+            text = { Text(stringResource(R.string.reset_db_confirm_msg)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        clientViewModel.resetDatabase()
+                        showResetDialog = false
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Database Reset Successfully")
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }
 

@@ -8,14 +8,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.personalgymapp.database.entity.ClientEntity
+import com.example.personalgymapp.R
+import com.example.personalgymapp.components.FieldExplanation
 import com.example.personalgymapp.model.Exercise
 import com.example.personalgymapp.model.WorkoutExercise
 import com.example.personalgymapp.model.WorkoutPlan
@@ -34,13 +37,16 @@ fun CreateWorkoutPlanScreen(
     var planNameError by remember { mutableStateOf<String?>(null) }
     var exercisesError by remember { mutableStateOf<String?>(null) }
 
+    val nameRequiredError = stringResource(R.string.error_plan_name_required)
+    val atLeastOneExerciseError = stringResource(R.string.error_at_least_one_exercise)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Workout Plan") },
+                title = { Text(stringResource(R.string.create_workout_plan)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -63,27 +69,37 @@ fun CreateWorkoutPlanScreen(
             OutlinedTextField(
                 value = planName,
                 onValueChange = { planName = it; planNameError = null },
-                label = { Text("Plan Name") },
+                label = { Text(stringResource(R.string.plan_name_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = planNameError != null,
-                supportingText = { planNameError?.let { Text(it) } }
+                supportingText = { planNameError?.let { Text(it) } },
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.wp_name_desc))
+                }
             )
 
             OutlinedTextField(
                 value = notes,
                 onValueChange = { notes = it },
-                label = { Text("Notes") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text(stringResource(R.string.plan_notes_label)) },
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    FieldExplanation(explanation = stringResource(R.string.wp_notes_desc))
+                }
             )
 
             HorizontalDivider()
 
-            Text(
-                text = "Exercises",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.exercises),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.width(8.dp))
+                FieldExplanation(explanation = stringResource(R.string.wp_exercises_desc))
+            }
 
             if (exercisesError != null) {
                 Text(text = exercisesError!!, color = MaterialTheme.colorScheme.error)
@@ -103,13 +119,14 @@ fun CreateWorkoutPlanScreen(
                         ) {
                             Text(text = workoutExercise.exerciseName, fontWeight = FontWeight.Bold)
                             IconButton(onClick = { selectedExercises.removeAt(index) }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete), tint = MaterialTheme.colorScheme.error)
                             }
                         }
-                        val typeText = if (workoutExercise.exerciseType == "REPS") "${workoutExercise.reps} reps" else "${workoutExercise.targetDurationSeconds}s"
-                        val setsRoundsText = if (workoutExercise.exerciseType == "REPS") "${workoutExercise.sets} sets" else "${workoutExercise.sets} rounds"
+                        val typeText = if (workoutExercise.exerciseType == "REPS") "${workoutExercise.reps} ${stringResource(R.string.reps).lowercase()}" else "${workoutExercise.targetDurationSeconds}s"
+                        val setsRoundsLabel = if (workoutExercise.exerciseType == "REPS") stringResource(R.string.sets) else stringResource(R.string.rounds)
+                        val setsRoundsText = "${workoutExercise.sets} $setsRoundsLabel"
                         Text(
-                            text = "$setsRoundsText x $typeText | ${workoutExercise.restSeconds}s rest",
+                            text = "$setsRoundsText x $typeText | ${workoutExercise.restSeconds}s ${stringResource(R.string.rest_s).lowercase().substringBefore(" ")}",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -124,7 +141,9 @@ fun CreateWorkoutPlanScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Add Exercise")
+                Text(stringResource(R.string.add_exercise_to_plan))
+                Spacer(Modifier.width(4.dp))
+                FieldExplanation(explanation = stringResource(R.string.wp_add_ex_desc))
             }
 
             if (showAddDialog) {
@@ -145,11 +164,11 @@ fun CreateWorkoutPlanScreen(
                 onClick = {
                     var isValid = true
                     if (planName.isBlank()) {
-                        planNameError = "Plan name is required"
+                        planNameError = nameRequiredError
                         isValid = false
                     }
                     if (selectedExercises.isEmpty()) {
-                        exercisesError = "Add at least one exercise"
+                        exercisesError = atLeastOneExerciseError
                         isValid = false
                     }
 
@@ -166,7 +185,7 @@ fun CreateWorkoutPlanScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save Workout Plan")
+                Text(stringResource(R.string.save_workout_plan))
             }
         }
     }
@@ -194,7 +213,13 @@ fun AddExerciseToPlanDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Exercise") },
+        title = { 
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.add_exercise_to_plan))
+                Spacer(Modifier.width(8.dp))
+                FieldExplanation(explanation = stringResource(R.string.wp_add_ex_desc))
+            }
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 var expanded by remember { mutableStateOf(false) }
@@ -210,7 +235,7 @@ fun AddExerciseToPlanDialog(
                             expanded = true 
                             if (selectedEx?.name != it) selectedEx = null
                         },
-                        label = { Text("Search Exercise") },
+                        label = { Text(stringResource(R.string.search_exercises)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier.menuAnchor().fillMaxWidth(),
                         singleLine = true
@@ -235,72 +260,80 @@ fun AddExerciseToPlanDialog(
                     }
                 }
 
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     FilterChip(
                         selected = exerciseType == "REPS",
                         onClick = { exerciseType = "REPS" },
-                        label = { Text("Reps") },
+                        label = { Text(stringResource(R.string.reps)) },
                         modifier = Modifier.weight(1f)
                     )
                     Spacer(Modifier.width(8.dp))
                     FilterChip(
                         selected = exerciseType == "TIME",
                         onClick = { exerciseType = "TIME" },
-                        label = { Text("Time") },
+                        label = { Text(stringResource(R.string.time)) },
                         modifier = Modifier.weight(1f)
                     )
+                    Spacer(Modifier.width(8.dp))
+                    FieldExplanation(explanation = stringResource(R.string.wp_ex_type_desc))
                 }
 
                 if (exerciseType == "TIME") {
-                    Row(modifier = Modifier.fillMaxWidth()) {
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         FilterChip(
                             selected = timerType == "COUNTDOWN",
                             onClick = { timerType = "COUNTDOWN" },
-                            label = { Text("Count-down") },
+                            label = { Text(stringResource(R.string.countdown)) },
                             modifier = Modifier.weight(1f)
                         )
                         Spacer(Modifier.width(8.dp))
                         FilterChip(
                             selected = timerType == "COUNTUP",
                             onClick = { timerType = "COUNTUP" },
-                            label = { Text("Count-up") },
+                            label = { Text(stringResource(R.string.countup)) },
                             modifier = Modifier.weight(1f)
                         )
+                        Spacer(Modifier.width(8.dp))
+                        FieldExplanation(explanation = stringResource(R.string.wp_timer_type_desc))
                     }
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
                         value = sets,
                         onValueChange = { sets = it },
-                        label = { Text(if (exerciseType == "REPS") "Sets" else "Rounds") },
+                        label = { Text(if (exerciseType == "REPS") stringResource(R.string.sets) else stringResource(R.string.rounds)) },
                         modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        trailingIcon = { FieldExplanation(explanation = stringResource(R.string.wp_sets_desc)) }
                     )
                     if (exerciseType == "REPS") {
                         OutlinedTextField(
                             value = reps,
                             onValueChange = { reps = it },
-                            label = { Text("Reps") },
+                            label = { Text(stringResource(R.string.reps)) },
                             modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            trailingIcon = { FieldExplanation(explanation = stringResource(R.string.wp_reps_val_desc)) }
                         )
                     } else {
                         OutlinedTextField(
                             value = duration,
                             onValueChange = { duration = it },
-                            label = { Text("Duration (s)") },
+                            label = { Text(stringResource(R.string.duration_s)) },
                             modifier = Modifier.weight(1f),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            trailingIcon = { FieldExplanation(explanation = stringResource(R.string.wp_duration_desc)) }
                         )
                     }
                 }
                 OutlinedTextField(
                     value = rest,
                     onValueChange = { rest = it },
-                    label = { Text("Rest (s)") },
+                    label = { Text(stringResource(R.string.rest_s)) },
                     modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    trailingIcon = { FieldExplanation(explanation = stringResource(R.string.wp_rest_desc)) }
                 )
             }
         },
@@ -327,12 +360,12 @@ fun AddExerciseToPlanDialog(
                     }
                 }
             ) {
-                Text("Add")
+                Text(stringResource(R.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

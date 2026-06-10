@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.personalgymapp.R
 import com.example.personalgymapp.components.AddActionFab
 import com.example.personalgymapp.model.Subscription
 import java.util.Locale
@@ -72,9 +74,9 @@ fun SubscriptionsScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Financial Overview", style = MaterialTheme.typography.titleMedium)
+                    Text(text = stringResource(R.string.financial_overview), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        text = "Total Outstanding: €${String.format(Locale.getDefault(), "%.2f", totalOwed)}",
+                        text = stringResource(R.string.total_outstanding, "€${String.format(Locale.getDefault(), "%.2f", totalOwed)}"),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = if (totalOwed > 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
@@ -86,7 +88,7 @@ fun SubscriptionsScreen(
 
             if (subscriptions.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "No subscriptions found", color = MaterialTheme.colorScheme.tertiary)
+                    Text(text = stringResource(R.string.no_subscriptions_found), color = MaterialTheme.colorScheme.tertiary)
                 }
             } else {
                 LazyColumn(
@@ -138,7 +140,7 @@ fun SubscriptionCard(subscription: Subscription, onClick: () -> Unit) {
                 )
                 Text(text = subscription.planName, style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    text = "Due: ${subscription.dueDate}",
+                    text = stringResource(R.string.due_date_label, subscription.dueDate),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.tertiary
                 )
@@ -151,13 +153,13 @@ fun SubscriptionCard(subscription: Subscription, onClick: () -> Unit) {
                 )
                 if (subscription.balance > 0) {
                     Text(
-                        text = "Owes: €${String.format(Locale.getDefault(), "%.0f", subscription.balance)}",
+                        text = stringResource(R.string.owes, "€${String.format(Locale.getDefault(), "%.0f", subscription.balance)}"),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error
                     )
                 } else {
                     Text(
-                        text = "Paid",
+                        text = stringResource(R.string.paid),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFF4CAF50)
                     )

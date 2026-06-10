@@ -36,6 +36,7 @@ fun TrainingSessionDetailsScreen(
     onStartWorkoutClick: (Int) -> Unit,
     onUpdateSession: (TrainingSession) -> Unit,
     onDeleteSession: (TrainingSession) -> Unit,
+    onEditClick: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
     var showPlanSelectionDialog by remember { mutableStateOf(false) }
@@ -48,11 +49,14 @@ fun TrainingSessionDetailsScreen(
                 title = { Text(stringResource(R.string.session_details)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
                 actions = {
                     if (trainingSession != null) {
+                        IconButton(onClick = { onEditClick(trainingSession.id) }) {
+                            Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_session), tint = MaterialTheme.colorScheme.primary)
+                        }
                         IconButton(onClick = {
                             val calendar = Calendar.getInstance()
                             val dateParts = trainingSession.date.split("-")
@@ -88,7 +92,7 @@ fun TrainingSessionDetailsScreen(
                             Icon(Icons.Default.CalendarMonth, contentDescription = stringResource(R.string.add_to_google_calendar), tint = MaterialTheme.colorScheme.primary)
                         }
                         IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete Session", tint = MaterialTheme.colorScheme.error)
+                            Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_session), tint = MaterialTheme.colorScheme.error)
                         }
                     }
                 },
@@ -108,7 +112,7 @@ fun TrainingSessionDetailsScreen(
                     .padding(innerPadding)
                     .padding(16.dp)
             ) {
-                Text(text = "Training session not found!", color = MaterialTheme.colorScheme.error)
+                Text(text = stringResource(R.string.session_not_found), color = MaterialTheme.colorScheme.error)
             }
         } else {
             Column(
@@ -143,10 +147,10 @@ fun TrainingSessionDetailsScreen(
                     if (workoutPlan != null) {
                         Row {
                             IconButton(onClick = { showPlanSelectionDialog = true }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Change Plan", tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.change_plan), tint = MaterialTheme.colorScheme.primary)
                             }
                             IconButton(onClick = { onUpdateSession(trainingSession.copy(workoutPlanId = null)) }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Remove Plan", tint = MaterialTheme.colorScheme.error)
+                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.remove_plan), tint = MaterialTheme.colorScheme.error)
                             }
                         }
                     } else {
@@ -196,7 +200,7 @@ fun TrainingSessionDetailsScreen(
                             }
                             if (workoutPlan.exercises.size > 3) {
                                 Text(
-                                    text = "...and ${workoutPlan.exercises.size - 3} more",
+                                    text = stringResource(R.string.and_more_count, workoutPlan.exercises.size - 3),
                                     style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.padding(top = 4.dp),
                                     color = MaterialTheme.colorScheme.tertiary
@@ -250,8 +254,8 @@ fun TrainingSessionDetailsScreen(
     if (showDeleteDialog && trainingSession != null) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Session") },
-            text = { Text("Are you sure you want to delete this session for ${trainingSession.clientName}?") },
+            title = { Text(stringResource(R.string.delete_session)) },
+            text = { Text(stringResource(R.string.delete_session_confirm, trainingSession.clientName)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -260,12 +264,12 @@ fun TrainingSessionDetailsScreen(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -321,7 +325,7 @@ fun WorkoutPlanSelectionDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         }
     )
 }

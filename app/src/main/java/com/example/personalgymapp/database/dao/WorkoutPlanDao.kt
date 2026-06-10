@@ -17,4 +17,7 @@ interface WorkoutPlanDao {
 
     @Delete
     suspend fun deleteWorkoutPlan(plan: WorkoutPlan)
+
+    @Query("DELETE FROM workout_plans")
+    suspend fun clearTable()
 }
