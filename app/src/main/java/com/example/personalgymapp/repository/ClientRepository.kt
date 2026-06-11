@@ -21,6 +21,7 @@ class ClientRepository(
     val allWorkoutPlans: Flow<List<WorkoutPlan>> = workoutPlanDao.getAllWorkoutPlans()
     val allSessions: Flow<List<TrainingSession>> = trainingSessionDao.getAllSessions()
     val allSubscriptionPlans: Flow<List<SubscriptionPlanEntity>> = subscriptionPlanDao.getAllSubscriptionPlans()
+    val allResults: Flow<List<SessionExerciseResult>> = sessionResultDao.getAllResults()
 
     fun getClientById(id: Int): Flow<ClientEntity?> = clientDao.getClientById(id)
     

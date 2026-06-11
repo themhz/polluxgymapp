@@ -83,7 +83,13 @@ fun HomeScreen(
             topBar = {
                 @OptIn(ExperimentalMaterial3Api::class)
                 TopAppBar(
-                    title = { Text(stringResource(R.string.app_name)) },
+                    title = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            AppLogo(size = 32.dp)
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.app_name))
+                        }
+                    },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(
@@ -121,24 +127,6 @@ fun HomeScreen(
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AppLogo(size = 120.dp)
-                
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(R.string.dashboard_title),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = stringResource(R.string.dashboard_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-                
-                Spacer(modifier = Modifier.height(32.dp))
-
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -183,7 +171,7 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         MenuCard(
-                            title = stringResource(R.string.progress),
+                            title = stringResource(R.string.progress_title),
                             icon = Icons.AutoMirrored.Filled.TrendingUp,
                             modifier = Modifier.weight(1f),
                             onClick = onProgressClick

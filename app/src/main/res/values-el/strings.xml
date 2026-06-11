@@ -3,7 +3,7 @@
     <string name="app_name">Εφαρμογή Personal Trainer</string>
     <string name="clients">Πελάτες</string>
     <string name="workout_plans">Προγράμματα Προπόνησης</string>
-    <string name="progress">Πρόοδος</string>
+    <string name="progress_title">Πρόοδος</string>
     <string name="training_sessions">Συνεδρίες Προπόνησης</string>
     <string name="sensors">Αισθητήρες</string>
     <string name="garmin">Garmin</string>

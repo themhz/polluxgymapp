@@ -3,7 +3,14 @@
     <string name="app_name">Personal Trainer App</string>
     <string name="clients">Clients</string>
     <string name="workout_plans">Workout Plans</string>
-    <string name="progress">Progress</string>
+    <string name="progress_title">Progress</string>
+    <string name="select_client_progress">Select client to view progress</string>
+    <string name="no_results_found">No results found for this client</string>
+    <string name="max_weight">Max Weight</string>
+    <string name="max_reps">Max Reps</string>
+    <string name="max_time">Max Time</string>
+    <string name="history_last_3">History (Last 3)</string>
+    <string name="select_client_to_see_results">Select a client to see their results</string>
     <string name="training_sessions">Training Sessions</string>
     <string name="sensors">Sensors</string>
     <string name="garmin">Garmin</string>

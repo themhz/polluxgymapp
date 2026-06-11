@@ -29,6 +29,7 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
     val trainingSessions by clientViewModel.trainingSessions.collectAsState()
     val subscriptions by clientViewModel.subscriptions.collectAsState()
     val subscriptionPlans by clientViewModel.subscriptionPlans.collectAsState()
+    val allResults by clientViewModel.allResults.collectAsState()
 
     // Filter states for Exercise Library
     var exerciseSearchQuery by remember { mutableStateOf("") }
@@ -36,8 +37,17 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
 
     NavHost(
         navController = navController,
-        startDestination = "home",
+        startDestination = "splash",
     ) {
+        composable("splash") {
+            SplashScreen(
+                onTimeout = {
+                    navController.navigate("home") {
+                        popUpTo("splash") { inclusive = true }
+                    }
+                }
+            )
+        }
         composable("home") {
             HomeScreen(
                 onClientsClick = { navController.navigate("clients") },
@@ -385,11 +395,10 @@ fun AppNavigation(clientViewModel: ClientViewModel) {
             )
         }
         composable("progress") {
-            // Need to update ProgressScreen to use persistent data if needed
             ProgressScreen(
-                progressEntries = emptyList(), // Placeholder for now
-                onProgressEntryClick = { },
-                onAddProgressEntryClick = { },
+                clients = clients,
+                sessions = trainingSessions,
+                results = allResults,
                 onBackClick = { navController.popBackStack() }
             )
         }

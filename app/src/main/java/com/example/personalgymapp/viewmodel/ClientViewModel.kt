@@ -59,6 +59,13 @@ class ClientViewModel(application: Application, private val repository: ClientRe
             initialValue = emptyList()
         )
 
+    val allResults: StateFlow<List<SessionExerciseResult>> = repository.allResults
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     fun getPaymentsForClient(clientId: Int): Flow<List<Payment>> =
         repository.getPaymentsForClient(clientId).map { entities ->
             entities.map { it.toDomainModel() }

@@ -9,6 +9,9 @@ interface SessionExerciseResultDao {
     @Query("SELECT * FROM session_exercise_results WHERE trainingSessionId = :sessionId")
     fun getResultsForSession(sessionId: Int): Flow<List<SessionExerciseResult>>
 
+    @Query("SELECT * FROM session_exercise_results")
+    fun getAllResults(): Flow<List<SessionExerciseResult>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertResult(result: SessionExerciseResult)
 

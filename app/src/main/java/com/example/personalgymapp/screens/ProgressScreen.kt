@@ -1,28 +1,48 @@
 package com.example.personalgymapp.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.personalgymapp.components.AddActionFab
-import com.example.personalgymapp.model.ProgressEntry
+import com.example.personalgymapp.R
+import com.example.personalgymapp.database.entity.ClientEntity
+import com.example.personalgymapp.model.SessionExerciseResult
+import com.example.personalgymapp.model.TrainingSession
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProgressScreen(
-    progressEntries: List<ProgressEntry>,
-    onProgressEntryClick: (Int) -> Unit,
-    onAddProgressEntryClick: () -> Unit,
+    clients: List<ClientEntity>,
+    sessions: List<TrainingSession>,
+    results: List<SessionExerciseResult>,
     onBackClick: () -> Unit
 ) {
+    var selectedClient by remember { mutableStateOf<ClientEntity?>(null) }
+    var expandedClientDropdown by remember { mutableStateOf(false) }
+
+    val clientExerciseProgress = remember(selectedClient, sessions, results) {
+        if (selectedClient == null) emptyMap<String, List<SessionExerciseResult>>()
+        else {
+            val clientSessionIds = sessions.filter { it.clientId == selectedClient!!.id }.map { it.id }.toSet()
+            results.filter { it.trainingSessionId in clientSessionIds }
+                .groupBy { it.exerciseName }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -31,11 +51,8 @@ fun ProgressScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.TrendingUp,
-                            contentDescription = null
-                        )
-                        Text("Progress Tracking")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.TrendingUp, contentDescription = null)
+                        Text(stringResource(R.string.progress_title))
                     }
                 },
                 navigationIcon = {
@@ -50,12 +67,6 @@ fun ProgressScreen(
                 )
             )
         },
-        floatingActionButton = {
-            AddActionFab(
-                label = "Add Progress",
-                onClick = onAddProgressEntryClick
-            )
-        },
         containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
@@ -64,34 +75,74 @@ fun ProgressScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            // Client Selection Dropdown
             Text(
-                text = "Track client measurements and results",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.tertiary
+                text = "Επιλέξτε πελάτη για προβολή προόδου",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (progressEntries.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = selectedClient?.name ?: "Επιλογή Πελάτη",
+                    onValueChange = {},
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                    trailingIcon = {
+                        IconButton(onClick = { expandedClientDropdown = !expandedClientDropdown }) {
+                            Icon(
+                                imageVector = if (expandedClientDropdown) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                )
+                DropdownMenu(
+                    expanded = expandedClientDropdown,
+                    onDismissRequest = { expandedClientDropdown = false },
+                    modifier = Modifier.fillMaxWidth(0.9f)
                 ) {
-                    Text(
-                        text = "No progress entries yet",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
+                    clients.forEach { client ->
+                        DropdownMenuItem(
+                            text = { Text(client.name) },
+                            onClick = {
+                                selectedClient = client
+                                expandedClientDropdown = false
+                            }
+                        )
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable { expandedClientDropdown = !expandedClientDropdown }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            if (selectedClient == null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Επιλέξτε έναν πελάτη για να δείτε τα αποτελέσματά του", color = MaterialTheme.colorScheme.tertiary)
+                }
+            } else if (clientExerciseProgress.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Δεν βρέθηκαν αποτελέσματα για αυτόν τον πελάτη", color = MaterialTheme.colorScheme.tertiary)
                 }
             } else {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(progressEntries) { entry ->
-                        ProgressEntryCard(
-                            entry = entry,
-                            onClick = { onProgressEntryClick(entry.id) }
+                    items(clientExerciseProgress.keys.toList()) { exerciseName ->
+                        val exerciseResults = clientExerciseProgress[exerciseName] ?: emptyList()
+                        ExerciseProgressCard(
+                            exerciseName = exerciseName,
+                            results = exerciseResults,
+                            sessions = sessions
                         )
                     }
                 }
@@ -101,80 +152,68 @@ fun ProgressScreen(
 }
 
 @Composable
-fun ProgressEntryCard(entry: ProgressEntry, onClick: () -> Unit) {
+fun ExerciseProgressCard(
+    exerciseName: String,
+    results: List<SessionExerciseResult>,
+    sessions: List<TrainingSession>
+) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ),
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.TrendingUp,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.primary
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = exerciseName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Calculate bests
+            val allSets = results.flatMap { it.sets }
+            val maxWeight = allSets.mapNotNull { it.weightKg }.maxOrNull()
+            val maxReps = allSets.mapNotNull { it.reps }.maxOrNull()
+            val maxDuration = allSets.mapNotNull { it.durationSeconds }.maxOrNull()
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                if (maxWeight != null) {
+                    ProgressStat(label = "Max Weight", value = "$maxWeight kg")
+                }
+                if (maxReps != null) {
+                    ProgressStat(label = "Max Reps", value = "$maxReps")
+                }
+                if (maxDuration != null) {
+                    ProgressStat(label = "Max Time", value = "${maxDuration}s")
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(text = "Ιστορικό (Τελευταία 3)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+            
+            results.takeLast(3).reversed().forEach { result ->
+                val sessionDate = sessions.find { it.id == result.trainingSessionId }?.date ?: "Unknown"
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = entry.clientName,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = entry.date,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = "${entry.weightKg} kg",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.secondary,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    entry.bodyFatPercent?.let {
-                        Text(
-                            text = "BF: $it%",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
+                    Text(text = sessionDate, style = MaterialTheme.typography.bodySmall)
+                    val bestSet = result.sets.maxByOrNull { (it.weightKg ?: 0.0) * (it.reps ?: 1).toDouble() }
+                    if (bestSet != null) {
+                        val info = if (bestSet.weightKg != null) "${bestSet.weightKg}kg x ${bestSet.reps}" else "${bestSet.durationSeconds}s"
+                        Text(text = info, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                     }
-                }
-                
-                if (entry.notes.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = entry.notes,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ProgressStat(label: String, value: String) {
+    Column {
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.tertiary)
+        Text(text = value, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.ExtraBold, color = Color(0xFF008080))
     }
 }
