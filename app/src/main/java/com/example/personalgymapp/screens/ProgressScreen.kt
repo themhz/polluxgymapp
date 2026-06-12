@@ -1,5 +1,9 @@
 package com.example.personalgymapp.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,13 +18,19 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.personalgymapp.R
 import com.example.personalgymapp.database.entity.ClientEntity
 import com.example.personalgymapp.model.SessionExerciseResult
+import com.example.personalgymapp.model.SessionSetResult
 import com.example.personalgymapp.model.TrainingSession
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,7 +87,7 @@ fun ProgressScreen(
         ) {
             // Client Selection Dropdown
             Text(
-                text = "Επιλέξτε πελάτη για προβολή προόδου",
+                text = stringResource(R.string.select_client_progress),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -85,7 +95,7 @@ fun ProgressScreen(
             
             Box(modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
-                    value = selectedClient?.name ?: "Επιλογή Πελάτη",
+                    value = selectedClient?.name ?: stringResource(R.string.select_client),
                     onValueChange = {},
                     readOnly = true,
                     modifier = Modifier.fillMaxWidth(),
@@ -126,11 +136,11 @@ fun ProgressScreen(
 
             if (selectedClient == null) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Επιλέξτε έναν πελάτη για να δείτε τα αποτελέσματά του", color = MaterialTheme.colorScheme.tertiary)
+                    Text(stringResource(R.string.select_client_to_see_results), color = MaterialTheme.colorScheme.tertiary)
                 }
             } else if (clientExerciseProgress.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Δεν βρέθηκαν αποτελέσματα για αυτόν τον πελάτη", color = MaterialTheme.colorScheme.tertiary)
+                    Text(stringResource(R.string.no_results_found), color = MaterialTheme.colorScheme.tertiary)
                 }
             } else {
                 LazyColumn(
@@ -157,18 +167,33 @@ fun ExerciseProgressCard(
     results: List<SessionExerciseResult>,
     sessions: List<TrainingSession>
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { isExpanded = !isExpanded },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = exerciseName,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = exerciseName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
             
             // Calculate bests
@@ -179,33 +204,131 @@ fun ExerciseProgressCard(
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (maxWeight != null) {
-                    ProgressStat(label = "Max Weight", value = "$maxWeight kg")
+                    ProgressStat(label = stringResource(R.string.max_weight), value = "$maxWeight kg")
                 }
                 if (maxReps != null) {
-                    ProgressStat(label = "Max Reps", value = "$maxReps")
+                    ProgressStat(label = stringResource(R.string.max_reps), value = "$maxReps")
                 }
                 if (maxDuration != null) {
-                    ProgressStat(label = "Max Time", value = "${maxDuration}s")
+                    ProgressStat(label = stringResource(R.string.max_time), value = "${maxDuration}s")
                 }
             }
             
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(text = "Ιστορικό (Τελευταία 3)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
-            
-            results.takeLast(3).reversed().forEach { result ->
-                val sessionDate = sessions.find { it.id == result.trainingSessionId }?.date ?: "Unknown"
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(text = sessionDate, style = MaterialTheme.typography.bodySmall)
-                    val bestSet = result.sets.maxByOrNull { (it.weightKg ?: 0.0) * (it.reps ?: 1).toDouble() }
-                    if (bestSet != null) {
-                        val info = if (bestSet.weightKg != null) "${bestSet.weightKg}kg x ${bestSet.reps}" else "${bestSet.durationSeconds}s"
-                        Text(text = info, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Line Chart
+                    ExerciseProgressChart(results = results, sessions = sessions)
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.history_last_3),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    
+                    results.takeLast(3).reversed().forEach { result ->
+                        val sessionDate = sessions.find { it.id == result.trainingSessionId }?.date ?: "Unknown"
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = sessionDate, style = MaterialTheme.typography.bodySmall)
+                            val bestSet = result.sets.maxByOrNull { (it.weightKg ?: 0.0) * (it.reps ?: 1).toDouble() }
+                            if (bestSet != null) {
+                                val info = if (bestSet.weightKg != null) "${bestSet.weightKg}kg x ${bestSet.reps}" else "${bestSet.durationSeconds}s"
+                                Text(text = info, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ExerciseProgressChart(
+    results: List<SessionExerciseResult>,
+    sessions: List<TrainingSession>
+) {
+    // Determine the metric to chart (Weight or Duration)
+    val chartData = results.mapNotNull { result ->
+        val session = sessions.find { it.id == result.trainingSessionId }
+        val date = session?.date ?: ""
+        
+        // Find "best" value for this session
+        val bestSet = result.sets.maxByOrNull { (it.weightKg ?: 0.0) * (it.reps ?: 1).toDouble() }
+        val value = bestSet?.weightKg ?: bestSet?.durationSeconds?.toDouble()
+        
+        if (value != null) date to value else null
+    }
+
+    if (chartData.size < 2) {
+        return // Not enough data for a line chart
+    }
+
+    val values = chartData.map { it.second }
+    val minVal = values.minOrNull() ?: 0.0
+    val maxVal = values.maxOrNull() ?: 1.0
+    val range = (maxVal - minVal).coerceAtLeast(1.0)
+    
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .padding(horizontal = 8.dp, vertical = 16.dp)
+        ) {
+            val width = size.width
+            val height = size.height
+            val spacing = width / (chartData.size - 1)
+            
+            val path = Path()
+            chartData.forEachIndexed { index, data ->
+                val x = index * spacing
+                val y = height - ((data.second - minVal) / range * height).toFloat()
+                
+                if (index == 0) {
+                    path.moveTo(x, y)
+                } else {
+                    path.lineTo(x, y)
+                }
+                
+                // Draw point
+                drawCircle(
+                    color = primaryColor,
+                    radius = 4.dp.toPx(),
+                    center = Offset(x, y)
+                )
+            }
+            
+            drawPath(
+                path = path,
+                color = primaryColor,
+                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+            )
+        }
+        
+        // Date labels (First and Last)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = chartData.first().first, style = MaterialTheme.typography.bodySmall, fontSize = 10.sp)
+            Text(text = chartData.last().first, style = MaterialTheme.typography.bodySmall, fontSize = 10.sp)
         }
     }
 }
