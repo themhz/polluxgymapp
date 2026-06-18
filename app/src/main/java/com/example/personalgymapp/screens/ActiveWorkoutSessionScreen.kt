@@ -1,18 +1,28 @@
 package com.example.personalgymapp.screens
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
 import android.media.AudioManager
 import android.media.ToneGenerator
+import android.os.Looper
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.*
@@ -22,11 +32,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import com.example.personalgymapp.model.*
+import com.google.android.gms.location.*
 import kotlinx.coroutines.delay
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Polyline
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,11 +65,13 @@ fun ActiveWorkoutSessionScreen(
         return
     }
 
+    val context = LocalContext.current
     var isStarted by remember { mutableStateOf(false) }
     var currentExerciseIndex by remember { mutableStateOf(0) }
     
     // State for all exercises: Map<ExerciseIndex, List<SetResults>>
     val sessionProgress = remember { mutableStateMapOf<Int, MutableList<SessionSetResult>>() }
+    val exerciseGpsPaths = remember { mutableStateMapOf<Int, List<GPSPoint>>() }
     
     // Initialize session progress with empty lists
     LaunchedEffect(workoutPlan) {
@@ -62,8 +83,82 @@ fun ActiveWorkoutSessionScreen(
     }
 
     val currentExercise = workoutPlan.exercises[currentExerciseIndex]
+    val isOutdoorRun = currentExercise.isGpsEnabled
+
     val currentExerciseSets = sessionProgress[currentExerciseIndex] ?: mutableListOf()
     val isExerciseFinished = currentExerciseSets.size >= currentExercise.sets
+
+    // GPS Tracking State
+    var isGpsTrackingActive by remember { mutableStateOf(false) }
+    val currentPath = remember { mutableStateListOf<GPSPoint>() }
+    var currentSpeed by remember { mutableStateOf(0f) } // m/s
+    var currentPace by remember { mutableStateOf("0:00") }
+
+    // Fused Location Provider
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val locationCallback = remember {
+        object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                for (location in locationResult.locations) {
+                    val point = GPSPoint(location.latitude, location.longitude, System.currentTimeMillis())
+                    currentPath.add(point)
+                    currentSpeed = location.speed
+                    
+                    if (location.speed > 0.5f) { // Only calculate pace if moving
+                        val paceSecondsPerKm = (1000 / location.speed).toInt()
+                        val min = paceSecondsPerKm / 60
+                        val sec = paceSecondsPerKm % 60
+                        currentPace = String.format(Locale.getDefault(), "%d:%02d", min, sec)
+                    } else {
+                        currentPace = "0:00"
+                    }
+                }
+            }
+        }
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                      permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            isGpsTrackingActive = true
+        }
+    }
+
+    // Effect to start/stop location updates
+    LaunchedEffect(isGpsTrackingActive) {
+        if (isGpsTrackingActive) {
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
+                .setMinUpdateIntervalMillis(2000L)
+                .build()
+            
+            try {
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+            } catch (e: SecurityException) {
+                isGpsTrackingActive = false
+            }
+        } else {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+        }
+    }
+
+    // Stop tracking when moving away from exercise or finishing
+    LaunchedEffect(currentExerciseIndex) {
+        if (isGpsTrackingActive) {
+            // Save path before clearing if it was an outdoor run
+            if (isOutdoorRun && currentPath.isNotEmpty()) {
+                exerciseGpsPaths[currentExerciseIndex - 1] = currentPath.toList()
+            }
+            isGpsTrackingActive = false
+            currentPath.clear()
+        }
+    }
 
     // Input state
     var repsInput by remember { mutableStateOf(currentExercise.reps.toString()) }
@@ -100,6 +195,12 @@ fun ActiveWorkoutSessionScreen(
         
         notesInput = ""
         
+        // If it was an outdoor run and this was the last set/round, save the path
+        if (isOutdoorRun && updatedList.size >= currentExercise.sets) {
+            exerciseGpsPaths[currentExerciseIndex] = currentPath.toList()
+            isGpsTrackingActive = false
+        }
+
         // Handle rest or next set
         if (updatedList.size < currentExercise.sets && currentExercise.restSeconds > 0) {
             isResting = true
@@ -186,6 +287,7 @@ fun ActiveWorkoutSessionScreen(
                     if (isStarted) {
                         IconButton(onClick = {
                             sessionProgress.clear()
+                            exerciseGpsPaths.clear()
                             workoutPlan.exercises.forEachIndexed { index, _ -> sessionProgress[index] = mutableListOf() }
                             currentExerciseIndex = 0
                             isStarted = false
@@ -286,6 +388,27 @@ fun ActiveWorkoutSessionScreen(
                     Text("Start the Session")
                 }
             } else {
+                // GPS Tracking UI
+                if (isOutdoorRun && !isResting) {
+                    GpsTrackingSection(
+                        isTracking = isGpsTrackingActive,
+                        currentPath = currentPath,
+                        currentSpeed = currentSpeed,
+                        currentPace = currentPace,
+                        onStartTracking = {
+                            val fineLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                            if (fineLocation == PackageManager.PERMISSION_GRANTED) {
+                                isGpsTrackingActive = true
+                            } else {
+                                locationPermissionLauncher.launch(
+                                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                                )
+                            }
+                        },
+                        onStopTracking = { isGpsTrackingActive = false }
+                    )
+                }
+
                 // Timer / Rest Display
                 if (isResting || currentExercise.exerciseType == "TIME") {
                     Card(
@@ -389,7 +512,8 @@ fun ActiveWorkoutSessionScreen(
                                         exerciseId = exercise.exerciseId,
                                         exerciseName = exercise.exerciseName,
                                         sets = sessionProgress[index] ?: listOf(),
-                                        notes = ""
+                                        notes = "",
+                                        gpsPath = exerciseGpsPaths[index]
                                     )
                                 }
                                 onFinishWorkout(finalResults)
@@ -441,6 +565,97 @@ fun ActiveWorkoutSessionScreen(
             }
             
             Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+fun GpsTrackingSection(
+    isTracking: Boolean,
+    currentPath: List<GPSPoint>,
+    currentSpeed: Float,
+    currentPace: String,
+    onStartTracking: () -> Unit,
+    onStopTracking: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(Icons.AutoMirrored.Filled.DirectionsRun, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Text("Outdoor GPS Tracking", fontWeight = FontWeight.Bold)
+                }
+                
+                Switch(
+                    checked = isTracking,
+                    onCheckedChange = { if (it) onStartTracking() else onStopTracking() }
+                )
+            }
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Pace", style = MaterialTheme.typography.labelSmall)
+                    Text(currentPace, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
+                    Text("min/km", style = MaterialTheme.typography.labelSmall)
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Speed", style = MaterialTheme.typography.labelSmall)
+                    Text(String.format(Locale.getDefault(), "%.1f", currentSpeed * 3.6f), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
+                    Text("km/h", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+
+            AnimatedVisibility(visible = isTracking || currentPath.isNotEmpty()) {
+                val lastPos = if (currentPath.isNotEmpty()) {
+                    GeoPoint(currentPath.last().latitude, currentPath.last().longitude)
+                } else {
+                    GeoPoint(0.0, 0.0)
+                }
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                ) {
+                    AndroidView(
+                        factory = { context ->
+                            MapView(context).apply {
+                                setTileSource(TileSourceFactory.MAPNIK)
+                                setMultiTouchControls(true)
+                                controller.setZoom(17.0)
+                                if (lastPos.latitude != 0.0) {
+                                    controller.setCenter(lastPos)
+                                }
+                            }
+                        },
+                        update = { mapView ->
+                            if (lastPos.latitude != 0.0) {
+                                mapView.controller.animateTo(lastPos)
+                            }
+                            
+                            if (currentPath.size > 1) {
+                                mapView.overlays.clear()
+                                val polyline = Polyline(mapView)
+                                polyline.setPoints(currentPath.map { GeoPoint(it.latitude, it.longitude) })
+                                polyline.outlinePaint.color = android.graphics.Color.BLUE // Set a default color
+                                polyline.outlinePaint.strokeWidth = 10f
+                                mapView.overlays.add(polyline)
+                            }
+                            mapView.invalidate()
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
         }
     }
 }

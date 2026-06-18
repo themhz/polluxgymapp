@@ -40,4 +40,17 @@ class Converters {
         val listType = object : TypeToken<List<SessionSetResult>>() {}.type
         return gson.fromJson(value, listType)
     }
+
+    @TypeConverter
+    fun fromGPSPointList(value: List<GPSPoint>?): String? {
+        return value?.let { gson.toJson(it) }
+    }
+
+    @TypeConverter
+    fun toGPSPointList(value: String?): List<GPSPoint>? {
+        return value?.let {
+            val listType = object : TypeToken<List<GPSPoint>>() {}.type
+            gson.fromJson(it, listType)
+        }
+    }
 }

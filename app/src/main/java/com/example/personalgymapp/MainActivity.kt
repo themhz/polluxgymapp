@@ -12,10 +12,16 @@ import com.example.personalgymapp.repository.ClientRepository
 import com.example.personalgymapp.ui.theme.PersonalGymAppTheme
 import com.example.personalgymapp.viewmodel.ClientViewModel
 import com.example.personalgymapp.viewmodel.ClientViewModelFactory
+import org.osmdroid.config.Configuration
+import android.preference.PreferenceManager
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialize OSMDroid
+        Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+        Configuration.getInstance().userAgentValue = packageName
 
         val database = AppDatabase.getDatabase(this)
         val repository = ClientRepository(

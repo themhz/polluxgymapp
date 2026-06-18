@@ -21,7 +21,7 @@ import com.example.personalgymapp.model.*
         SessionExerciseResult::class,
         SubscriptionPlanEntity::class
     ], 
-    version = 6, 
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

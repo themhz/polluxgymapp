@@ -3,18 +3,23 @@ package com.example.personalgymapp.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.personalgymapp.components.AddActionFab
-import com.example.personalgymapp.model.SessionExerciseResult
-import com.example.personalgymapp.model.TrainingSession
-import com.example.personalgymapp.model.WorkoutPlan
+import com.example.personalgymapp.model.*
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Polyline
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -224,6 +229,46 @@ fun ExerciseResultCard(result: SessionExerciseResult) {
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+
+            if (result.gpsPath != null && result.gpsPath.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Tracked Route",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                val pathPoints = result.gpsPath.map { GeoPoint(it.latitude, it.longitude) }
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                ) {
+                    AndroidView(
+                        factory = { context ->
+                            MapView(context).apply {
+                                setTileSource(TileSourceFactory.MAPNIK)
+                                setMultiTouchControls(false) // Read-only view
+                                if (pathPoints.isNotEmpty()) {
+                                    controller.setZoom(15.0)
+                                    controller.setCenter(pathPoints.first())
+                                    
+                                    val polyline = Polyline(this)
+                                    polyline.setPoints(pathPoints)
+                                    polyline.outlinePaint.color = android.graphics.Color.BLUE
+                                    polyline.outlinePaint.strokeWidth = 8f
+                                    overlays.add(polyline)
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             }

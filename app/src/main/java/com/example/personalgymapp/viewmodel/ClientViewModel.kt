@@ -118,6 +118,7 @@ class ClientViewModel(application: Application, private val repository: ClientRe
                     Exercise(name = "Squats", muscleGroup = "Legs", equipment = "Bodyweight", difficulty = "Beginner", imageResName = "squats", instructions = "Lower hips as if sitting."),
                     Exercise(name = "Plank", muscleGroup = "Core", equipment = "Bodyweight", difficulty = "Beginner", imageResName = "plank", instructions = "Maintain straight line."),
                     Exercise(name = "Running", muscleGroup = "Cardio", equipment = "Treadmill", difficulty = "Beginner", imageResName = "running", instructions = "Steady pace."),
+                    Exercise(name = "Outdoor Running", muscleGroup = "Cardio", equipment = "Outdoor", difficulty = "Beginner", imageResName = "running", instructions = "Run outside with GPS tracking.", isGpsEnabled = true),
                     Exercise(name = "Bicep Curls", muscleGroup = "Arms", equipment = "Dumbbells", difficulty = "Beginner", imageResName = "bicep_curls", instructions = "Curl towards shoulders.")
                 )
                 seedExercises.forEach { repository.insertExercise(it) }
@@ -179,7 +180,10 @@ class ClientViewModel(application: Application, private val repository: ClientRe
                     )),
                     WorkoutPlan(id = 5, name = "Upper Body Mix", notes = "Chest & Arms", exercises = listOf(
                         WorkoutExercise(exerciseId = allEx[0].id, exerciseName = allEx[0].name, sets = 3, reps = 15, restSeconds = 60),
-                        WorkoutExercise(exerciseId = allEx[4].id, exerciseName = allEx[4].name, sets = 3, reps = 12, restSeconds = 45)
+                        WorkoutExercise(exerciseId = allEx[5].id, exerciseName = allEx[5].name, sets = 3, reps = 12, restSeconds = 45)
+                    )),
+                    WorkoutPlan(id = 6, name = "Outdoor Cardio", notes = "GPS Tracked Run", exercises = listOf(
+                        WorkoutExercise(exerciseId = allEx[4].id, exerciseName = allEx[4].name, sets = 1, reps = 0, targetDurationSeconds = 1800, restSeconds = 0, exerciseType = "TIME", timerType = "COUNTUP", isGpsEnabled = true)
                     ))
                 )
                 plans.forEach { repository.insertWorkoutPlan(it) }

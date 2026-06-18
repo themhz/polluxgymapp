@@ -17,5 +17,6 @@ data class Exercise(
     val imageResName: String? = null,
     val videoResName: String? = null,
     val imageUri: String? = null,
-    val videoUri: String? = null
+    val videoUri: String? = null,
+    val isGpsEnabled: Boolean = false
 )

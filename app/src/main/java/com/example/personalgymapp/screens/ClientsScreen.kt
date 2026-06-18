@@ -166,7 +166,8 @@ fun ClientsScreen(
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
                     items(filteredClients) { client ->
                         val planName = subscriptionPlans.find { it.id == client.subscriptionPlanId }?.name ?: stringResource(R.string.no_plan)

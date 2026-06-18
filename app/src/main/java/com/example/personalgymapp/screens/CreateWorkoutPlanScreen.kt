@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
@@ -206,9 +207,15 @@ fun AddExerciseToPlanDialog(
     var reps by remember { mutableStateOf("10") }
     var duration by remember { mutableStateOf("60") }
     var rest by remember { mutableStateOf("60") }
+    var isGpsEnabled by remember { mutableStateOf(false) }
 
     val filteredExercises = remember(searchQuery) {
         availableExercises.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    }
+    
+    // When an exercise is selected, we can default its GPS setting
+    LaunchedEffect(selectedEx) {
+        selectedEx?.let { isGpsEnabled = it.isGpsEnabled }
     }
 
     AlertDialog(
@@ -335,6 +342,21 @@ fun AddExerciseToPlanDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     trailingIcon = { FieldExplanation(explanation = stringResource(R.string.wp_rest_desc)) }
                 )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.AutoMirrored.Filled.DirectionsRun, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text("Enable GPS Tracking", style = MaterialTheme.typography.bodyMedium)
+                    }
+                    Switch(
+                        checked = isGpsEnabled,
+                        onCheckedChange = { isGpsEnabled = it }
+                    )
+                }
             }
         },
         confirmButton = {
@@ -354,7 +376,8 @@ fun AddExerciseToPlanDialog(
                                 restSeconds = res,
                                 exerciseType = exerciseType,
                                 targetDurationSeconds = d,
-                                timerType = timerType
+                                timerType = timerType,
+                                isGpsEnabled = isGpsEnabled
                             )
                         )
                     }

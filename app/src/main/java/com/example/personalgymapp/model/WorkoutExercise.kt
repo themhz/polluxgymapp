@@ -8,5 +8,6 @@ data class WorkoutExercise(
     val restSeconds: Int,
     val exerciseType: String = "REPS",
     val targetDurationSeconds: Int? = null,
-    val timerType: String = "COUNTDOWN" // "COUNTDOWN" or "COUNTUP"
+    val timerType: String = "COUNTDOWN", // "COUNTDOWN" or "COUNTUP"
+    val isGpsEnabled: Boolean = false
 )

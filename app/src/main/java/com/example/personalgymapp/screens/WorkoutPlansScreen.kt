@@ -123,7 +123,8 @@ fun WorkoutPlansScreen(
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
                     items(filteredWorkoutPlans) { plan ->
                         WorkoutPlanCard(

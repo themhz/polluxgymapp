@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -239,6 +240,7 @@ fun EditExerciseInPlanDialog(
     var reps by remember { mutableStateOf(workoutExercise.reps.toString()) }
     var duration by remember { mutableStateOf(workoutExercise.targetDurationSeconds?.toString() ?: "60") }
     var rest by remember { mutableStateOf(workoutExercise.restSeconds.toString()) }
+    var isGpsEnabled by remember { mutableStateOf(workoutExercise.isGpsEnabled) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -290,6 +292,21 @@ fun EditExerciseInPlanDialog(
                     label = { Text("Rest (s)") },
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.AutoMirrored.Filled.DirectionsRun, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text("Enable GPS Tracking", style = MaterialTheme.typography.bodyMedium)
+                    }
+                    Switch(
+                        checked = isGpsEnabled,
+                        onCheckedChange = { isGpsEnabled = it }
+                    )
+                }
             }
         },
         confirmButton = {
@@ -303,7 +320,8 @@ fun EditExerciseInPlanDialog(
                     reps = if(exerciseType == "REPS") r else 0,
                     targetDurationSeconds = if(exerciseType == "TIME") d else null,
                     restSeconds = res,
-                    exerciseType = exerciseType
+                    exerciseType = exerciseType,
+                    isGpsEnabled = isGpsEnabled
                 ))
             }) { Text("Update") }
         },

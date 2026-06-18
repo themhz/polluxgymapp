@@ -7,6 +7,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,6 +37,7 @@ fun AddExerciseScreen(
     var videoResName by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<String?>(null) }
     var selectedVideoUri by remember { mutableStateOf<String?>(null) }
+    var isGpsEnabled by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -374,6 +376,27 @@ fun AddExerciseScreen(
                 }
             }
 
+            // GPS Default Toggle
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.AutoMirrored.Filled.DirectionsRun, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text("Enable GPS Tracking by Default", style = MaterialTheme.typography.bodyMedium)
+                    }
+                    Switch(
+                        checked = isGpsEnabled,
+                        onCheckedChange = { isGpsEnabled = it }
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
@@ -405,7 +428,8 @@ fun AddExerciseScreen(
                             imageResName = imageResName.ifBlank { null },
                             videoResName = videoResName.ifBlank { null },
                             imageUri = selectedImageUri,
-                            videoUri = selectedVideoUri
+                            videoUri = selectedVideoUri,
+                            isGpsEnabled = isGpsEnabled
                         )
                         onSaveExercise(newExercise)
                     }

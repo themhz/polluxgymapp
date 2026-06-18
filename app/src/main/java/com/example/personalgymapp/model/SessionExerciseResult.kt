@@ -11,5 +11,12 @@ data class SessionExerciseResult(
     val exerciseId: Int,
     val exerciseName: String,
     val sets: List<SessionSetResult>,
-    val notes: String
+    val notes: String,
+    val gpsPath: List<GPSPoint>? = null
+)
+
+data class GPSPoint(
+    val latitude: Double,
+    val longitude: Double,
+    val timestamp: Long
 )
