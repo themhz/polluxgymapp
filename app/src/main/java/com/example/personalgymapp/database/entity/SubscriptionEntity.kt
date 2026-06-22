@@ -1,10 +1,23 @@
 package com.example.personalgymapp.database.entity
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.personalgymapp.model.Subscription
 
-@Entity(tableName = "subscriptions")
+@Entity(
+    tableName = "subscriptions",
+    foreignKeys = [
+        ForeignKey(
+            entity = ClientEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["clientId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("clientId")]
+)
 data class SubscriptionEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

@@ -100,6 +100,9 @@ fun ActiveWorkoutSessionScreen(
         object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
+                    // Filter out very inaccurate points (e.g. > 40m error)
+                    if (location.hasAccuracy() && location.accuracy > 40f) continue
+
                     val point = GPSPoint(location.latitude, location.longitude, System.currentTimeMillis())
                     currentPath.add(point)
                     currentSpeed = location.speed
@@ -130,8 +133,9 @@ fun ActiveWorkoutSessionScreen(
     // Effect to start/stop location updates
     LaunchedEffect(isGpsTrackingActive) {
         if (isGpsTrackingActive) {
-            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
-                .setMinUpdateIntervalMillis(2000L)
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000L)
+                .setMinUpdateIntervalMillis(1000L)
+                .setWaitForAccurateLocation(false)
                 .build()
             
             try {
@@ -505,6 +509,11 @@ fun ActiveWorkoutSessionScreen(
                     } else {
                         Button(
                             onClick = {
+                                // Final check: if GPS is active for current exercise, save it before finishing
+                                if (isOutdoorRun && currentPath.isNotEmpty()) {
+                                    exerciseGpsPaths[currentExerciseIndex] = currentPath.toList()
+                                }
+
                                 val finalResults = workoutPlan.exercises.mapIndexed { index, exercise ->
                                     SessionExerciseResult(
                                         id = 0,
@@ -526,6 +535,7 @@ fun ActiveWorkoutSessionScreen(
                 } else {
                     // Entry Form for next set
                     if (!isResting) {
+                        // ... Reps/Weight/Notes fields ...
                         if (currentExercise.exerciseType == "REPS") {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 OutlinedTextField(
@@ -551,6 +561,8 @@ fun ActiveWorkoutSessionScreen(
                             label = { Text("Set Notes (Optional)") },
                             modifier = Modifier.fillMaxWidth()
                         )
+                        
+                        Spacer(Modifier.height(8.dp))
 
                         Button(
                             onClick = { completeSet() },
@@ -559,6 +571,34 @@ fun ActiveWorkoutSessionScreen(
                         ) {
                             val setLabel = if (currentExercise.exerciseType == "REPS") "Set" else "Round"
                             Text("Complete $setLabel ${currentExerciseSets.size + 1}")
+                        }
+
+                        Spacer(Modifier.height(16.dp))
+
+                        // Added: "Finish Early" button for GPS exercises
+                        if (isOutdoorRun) {
+                            OutlinedButton(
+                                onClick = {
+                                    // Manually "finish" the current GPS exercise and show next steps
+                                    exerciseGpsPaths[currentExerciseIndex] = currentPath.toList()
+                                    isGpsTrackingActive = false
+                                    // Add a dummy set if none exists to mark it as "partially done"
+                                    if (currentExerciseSets.isEmpty()) {
+                                        completeSet() 
+                                    } else {
+                                        // Force state update to show "Exercise Completed"
+                                        val dummy = sessionProgress[currentExerciseIndex]!!.toMutableList()
+                                        while(dummy.size < currentExercise.sets) {
+                                            dummy.add(SessionSetResult(dummy.size + 1, 0, 0.0, 0, null, "Finished early"))
+                                        }
+                                        sessionProgress[currentExerciseIndex] = dummy
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
+                            ) {
+                                Text("Stop Tracking & Continue")
+                            }
                         }
                     }
                 }
@@ -631,7 +671,7 @@ fun GpsTrackingSection(
                             MapView(context).apply {
                                 setTileSource(TileSourceFactory.MAPNIK)
                                 setMultiTouchControls(true)
-                                controller.setZoom(17.0)
+                                controller.setZoom(19.0)
                                 if (lastPos.latitude != 0.0) {
                                     controller.setCenter(lastPos)
                                 }

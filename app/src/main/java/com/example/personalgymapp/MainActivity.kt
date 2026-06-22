@@ -12,8 +12,12 @@ import com.example.personalgymapp.repository.ClientRepository
 import com.example.personalgymapp.ui.theme.PersonalGymAppTheme
 import com.example.personalgymapp.viewmodel.ClientViewModel
 import com.example.personalgymapp.viewmodel.ClientViewModelFactory
+import com.example.personalgymapp.viewmodel.SettingsViewModel
 import org.osmdroid.config.Configuration
 import android.preference.PreferenceManager
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,17 +39,22 @@ class MainActivity : AppCompatActivity() {
             database.subscriptionPlanDao()
         )
         val viewModel = ViewModelProvider(this, ClientViewModelFactory(application, repository))[ClientViewModel::class.java]
+        val settingsViewModel = ViewModelProvider(this)[SettingsViewModel::class.java]
         
         viewModel.seedDatabaseIfEmpty()
 
         enableEdgeToEdge()
         setContent {
-            PersonalGymAppTheme {
+            val settings by settingsViewModel.settings.collectAsState()
+            
+            PersonalGymAppTheme(
+                primaryColor = Color(settings.primaryColor)
+            ) {
                 androidx.compose.material3.Surface(
                     modifier = androidx.compose.ui.Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(clientViewModel = viewModel)
+                    AppNavigation(clientViewModel = viewModel, settingsViewModel = settingsViewModel)
                 }
             }
         }

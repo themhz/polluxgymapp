@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
@@ -18,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -27,11 +29,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.personalgymapp.R
+import com.example.personalgymapp.components.FullScreenMapDialog
 import com.example.personalgymapp.database.entity.ClientEntity
+import com.example.personalgymapp.model.GPSPoint
 import com.example.personalgymapp.model.SessionExerciseResult
 import com.example.personalgymapp.model.SessionSetResult
 import com.example.personalgymapp.model.TrainingSession
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Polyline
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +52,7 @@ fun ProgressScreen(
 ) {
     var selectedClient by remember { mutableStateOf<ClientEntity?>(null) }
     var expandedClientDropdown by remember { mutableStateOf(false) }
+    var fullScreenMapPoints by remember { mutableStateOf<List<GPSPoint>?>(null) }
 
     val clientExerciseProgress = remember(selectedClient, sessions, results) {
         if (selectedClient == null) emptyMap<String, List<SessionExerciseResult>>()
@@ -152,12 +162,20 @@ fun ProgressScreen(
                         ExerciseProgressCard(
                             exerciseName = exerciseName,
                             results = exerciseResults,
-                            sessions = sessions
+                            sessions = sessions,
+                            onMapClick = { fullScreenMapPoints = it }
                         )
                     }
                 }
             }
         }
+    }
+
+    if (fullScreenMapPoints != null) {
+        FullScreenMapDialog(
+            points = fullScreenMapPoints!!,
+            onDismiss = { fullScreenMapPoints = null }
+        )
     }
 }
 
@@ -165,7 +183,8 @@ fun ProgressScreen(
 fun ExerciseProgressCard(
     exerciseName: String,
     results: List<SessionExerciseResult>,
-    sessions: List<TrainingSession>
+    sessions: List<TrainingSession>,
+    onMapClick: (List<GPSPoint>) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -234,17 +253,54 @@ fun ExerciseProgressCard(
                     
                     results.takeLast(3).reversed().forEach { result ->
                         val sessionDate = sessions.find { it.id == result.trainingSessionId }?.date ?: "Unknown"
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(text = sessionDate, style = MaterialTheme.typography.bodySmall)
-                            val bestSet = result.sets.maxByOrNull { (it.weightKg ?: 0.0) * (it.reps ?: 1).toDouble() }
-                            if (bestSet != null) {
-                                val info = if (bestSet.weightKg != null) "${bestSet.weightKg}kg x ${bestSet.reps}" else "${bestSet.durationSeconds}s"
-                                Text(text = info, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(text = sessionDate, style = MaterialTheme.typography.bodySmall)
+                                val bestSet = result.sets.maxByOrNull { (it.weightKg ?: 0.0) * (it.reps ?: 1).toDouble() }
+                                if (bestSet != null) {
+                                    val info = if (bestSet.weightKg != null) "${bestSet.weightKg}kg x ${bestSet.reps}" else "${bestSet.durationSeconds}s"
+                                    Text(text = info, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            
+                            if (result.gpsPath != null && result.gpsPath.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(120.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                ) {
+                                    val pathPoints = result.gpsPath.map { GeoPoint(it.latitude, it.longitude) }
+                                    AndroidView(
+                                        factory = { context ->
+                                            MapView(context).apply {
+                                                setTileSource(TileSourceFactory.MAPNIK)
+                                                setMultiTouchControls(false)
+                                                if (pathPoints.isNotEmpty()) {
+                                                    controller.setZoom(16.0)
+                                                    controller.setCenter(pathPoints.first())
+                                                    val polyline = Polyline(this)
+                                                    polyline.setPoints(pathPoints)
+                                                    polyline.outlinePaint.color = android.graphics.Color.BLUE
+                                                    polyline.outlinePaint.strokeWidth = 6f
+                                                    overlays.add(polyline)
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier.fillMaxSize(),
+                                        update = { it.invalidate() }
+                                    )
+                                    // Clickable overlay to enlarge
+                                    Box(
+                                        modifier = Modifier
+                                            .matchParentSize()
+                                            .clickable { onMapClick(result.gpsPath) }
+                                    )
+                                }
                             }
                         }
                     }

@@ -27,10 +27,13 @@
     <!-- Clients Screen -->
     <string name="manage_clients">Manage your training clients</string>
     <string name="search_by_name">Search by name</string>
+    <string name="filter_clients">Filter Clients</string>
     <string name="filter_by_plan">Filter by Subscription Plan</string>
     <string name="all_plans">Select Subscription Plan</string>
     <string name="no_clients_yet">No clients yet</string>
     <string name="no_matching_clients">No matching clients</string>
+    <string name="unpaid_only">Unpaid Only</string>
+    <string name="unpaid_badge">UNPAID</string>
     <string name="add">Add</string>
     <string name="add_client">Add Client</string>
     <string name="edit_client">Edit Client</string>
@@ -156,11 +159,15 @@
     <string name="remove_plan">Remove Plan</string>
     <string name="add_to_google_calendar">Add to Google Calendar</string>
     <string name="session_notes">Session Notes</string>
+    <string name="tracked_route">Tracked Route</string>
+    <string name="tap_to_enlarge">Tap to enlarge</string>
+    <string name="route_detail">Tracked Route Detail</string>
 
     <!-- Settings -->
     <string name="decimal_separator">Decimal Separator</string>
     <string name="thousand_separator">Thousand Separator</string>
     <string name="allow_notifications">Allow Notifications</string>
+    <string name="theme_color">Theme Color</string>
     <string name="dot">Dot (.)</string>
     <string name="comma">Comma (,)</string>
     <string name="space">Space ( )</string>

@@ -4,6 +4,8 @@ import com.example.personalgymapp.database.dao.*
 import com.example.personalgymapp.database.entity.*
 import com.example.personalgymapp.model.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 
 class ClientRepository(
     private val clientDao: ClientDao,
@@ -18,7 +20,30 @@ class ClientRepository(
     val allClients: Flow<List<ClientEntity>> = clientDao.getAllClients()
     val allSubscriptions: Flow<List<SubscriptionEntity>> = subscriptionDao.getAllSubscriptions()
     val allExercises: Flow<List<Exercise>> = exerciseDao.getAllExercises()
-    val allWorkoutPlans: Flow<List<WorkoutPlan>> = workoutPlanDao.getAllWorkoutPlans()
+    
+    val allWorkoutPlans: Flow<List<WorkoutPlan>> = combine(
+        workoutPlanDao.getAllWorkoutPlansWithExercises(),
+        allExercises
+    ) { plansWithExercises, exercises ->
+        val exerciseMap = exercises.associateBy { it.id }
+        plansWithExercises.map { withEx ->
+            withEx.plan.copy(
+                exercises = withEx.workoutPlanExercises.map { entity ->
+                    WorkoutExercise(
+                        exerciseId = entity.exerciseId,
+                        exerciseName = exerciseMap[entity.exerciseId]?.name ?: "Unknown",
+                        sets = entity.sets,
+                        reps = entity.reps,
+                        restSeconds = entity.restSeconds,
+                        exerciseType = entity.exerciseType,
+                        targetDurationSeconds = entity.targetDurationSeconds,
+                        timerType = entity.timerType,
+                        isGpsEnabled = entity.isGpsEnabled
+                    )
+                }
+            )
+        }
+    }
     val allSessions: Flow<List<TrainingSession>> = trainingSessionDao.getAllSessions()
     val allSubscriptionPlans: Flow<List<SubscriptionPlanEntity>> = subscriptionPlanDao.getAllSubscriptionPlans()
     val allResults: Flow<List<SessionExerciseResult>> = sessionResultDao.getAllResults()
@@ -58,8 +83,8 @@ class ClientRepository(
     suspend fun deleteExercise(exercise: Exercise) = exerciseDao.deleteExercise(exercise)
 
     // Workout Plans
-    suspend fun insertWorkoutPlan(plan: WorkoutPlan) = workoutPlanDao.insertWorkoutPlan(plan)
-    suspend fun updateWorkoutPlan(plan: WorkoutPlan) = workoutPlanDao.updateWorkoutPlan(plan)
+    suspend fun insertWorkoutPlan(plan: WorkoutPlan) = workoutPlanDao.insertWorkoutPlanWithExercises(plan)
+    suspend fun updateWorkoutPlan(plan: WorkoutPlan) = workoutPlanDao.updateWorkoutPlanWithExercises(plan)
     suspend fun deleteWorkoutPlan(plan: WorkoutPlan) = workoutPlanDao.deleteWorkoutPlan(plan)
 
     // Training Sessions

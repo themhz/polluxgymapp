@@ -20,10 +20,13 @@
     <!-- Clients Screen -->
     <string name="manage_clients">Διαχείριση των πελατών σας</string>
     <string name="search_by_name">Αναζήτηση βάσει ονόματος</string>
+    <string name="filter_clients">Φιλτράρισμα Πελατών</string>
     <string name="filter_by_plan">Φιλτράρισμα βάσει Συνδρομής</string>
     <string name="all_plans">Επιλογή Συνδρομής</string>
     <string name="no_clients_yet">Δεν υπάρχουν ακόμα πελάτες</string>
     <string name="no_matching_clients">Δεν βρέθηκαν πελάτες</string>
+    <string name="unpaid_only">Απλήρωτες Συνδρομές</string>
+    <string name="unpaid_badge">ΑΠΛΗΡΩΤΟ</string>
     <string name="add">Προσθήκη</string>
     <string name="add_client">Προσθήκη Πελάτη</string>
     <string name="edit_client">Επεξεργασία Πελάτη</string>
@@ -149,11 +152,15 @@
     <string name="remove_plan">Αφαίρεση Προγράμματος</string>
     <string name="add_to_google_calendar">Προσθήκη στο Google Calendar</string>
     <string name="session_notes">Σημειώσεις Συνεδρίας</string>
+    <string name="tracked_route">Καταγεγραμμένη Διαδρομή</string>
+    <string name="tap_to_enlarge">Πατήστε για μεγέθυνση</string>
+    <string name="route_detail">Λεπτομέρειες Διαδρομής</string>
 
     <!-- Settings -->
     <string name="decimal_separator">Διαχωριστικό Δεκαδικών</string>
     <string name="thousand_separator">Διαχωριστικό Χιλιάδων</string>
     <string name="allow_notifications">Επιτρέπονται οι Ειδοποιήσεις</string>
+    <string name="theme_color">Χρώμα Θέματος</string>
     <string name="dot">Τελεία (.)</string>
     <string name="comma">Κόμμα (,)</string>
     <string name="space">Κενό ( )</string>

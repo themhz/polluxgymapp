@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -36,16 +37,22 @@ fun ClientsScreen(
     onAddClientClick: () -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedPlanFilter by remember { mutableStateOf("All Plans") }
-    var expandedPlanFilter by remember { mutableStateOf(false) }
+    var selectedFilter by remember { mutableStateOf("All") }
+    var expandedFilter by remember { mutableStateOf(false) }
 
-    val allPlanNames = listOf("All Plans") + subscriptionPlans.map { it.name }.distinct()
+    val filterOptions = listOf("All", "Unpaid Only") + subscriptionPlans.map { it.name }.distinct()
 
     val filteredClients = clients.filter { client ->
         val matchesSearch = client.name.contains(searchQuery, ignoreCase = true)
         val planName = subscriptionPlans.find { it.id == client.subscriptionPlanId }?.name ?: stringResource(R.string.no_plan)
-        val matchesPlan = selectedPlanFilter == "All Plans" || planName == selectedPlanFilter
-        matchesSearch && matchesPlan
+        
+        val matchesFilter = when (selectedFilter) {
+            "All" -> true
+            "Unpaid Only" -> subscriptions.any { it.clientId == client.id && it.status != "Paid" }
+            else -> planName == selectedFilter
+        }
+
+        matchesSearch && matchesFilter
     }
 
     Scaffold(
@@ -110,16 +117,20 @@ fun ClientsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Box(modifier = Modifier.fillMaxWidth()) {
-                val filterLabel = if (selectedPlanFilter == "All Plans") stringResource(R.string.all_plans) else selectedPlanFilter
+                val filterLabel = when(selectedFilter) {
+                    "All" -> stringResource(R.string.status_all)
+                    "Unpaid Only" -> stringResource(R.string.unpaid_only)
+                    else -> selectedFilter
+                }
                 OutlinedTextField(
                     value = filterLabel,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text(stringResource(R.string.filter_by_plan)) },
+                    label = { Text(stringResource(R.string.filter_clients)) },
                     trailingIcon = {
-                        IconButton(onClick = { expandedPlanFilter = !expandedPlanFilter }) {
+                        IconButton(onClick = { expandedFilter = !expandedFilter }) {
                             Icon(
-                                imageVector = if (expandedPlanFilter) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                imageVector = if (expandedFilter) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                                 contentDescription = null
                             )
                         }
@@ -127,16 +138,21 @@ fun ClientsScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 DropdownMenu(
-                    expanded = expandedPlanFilter,
-                    onDismissRequest = { expandedPlanFilter = false },
+                    expanded = expandedFilter,
+                    onDismissRequest = { expandedFilter = false },
                     modifier = Modifier.fillMaxWidth(0.9f)
                 ) {
-                    allPlanNames.forEach { plan ->
+                    filterOptions.forEach { option ->
+                        val label = when(option) {
+                            "All" -> stringResource(R.string.status_all)
+                            "Unpaid Only" -> stringResource(R.string.unpaid_only)
+                            else -> option
+                        }
                         DropdownMenuItem(
-                            text = { Text(if (plan == "All Plans") stringResource(R.string.all_plans) else plan) },
+                            text = { Text(label) },
                             onClick = {
-                                selectedPlanFilter = plan
-                                expandedPlanFilter = false
+                                selectedFilter = option
+                                expandedFilter = false
                             }
                         )
                     }
@@ -146,7 +162,7 @@ fun ClientsScreen(
                     modifier = Modifier
                         .matchParentSize()
                         .padding(top = 8.dp)
-                        .clickable { expandedPlanFilter = !expandedPlanFilter }
+                        .clickable { expandedFilter = !expandedFilter }
                 )
             }
 
@@ -171,9 +187,12 @@ fun ClientsScreen(
                 ) {
                     items(filteredClients) { client ->
                         val planName = subscriptionPlans.find { it.id == client.subscriptionPlanId }?.name ?: stringResource(R.string.no_plan)
+                        val hasUnpaid = subscriptions.any { it.clientId == client.id && it.status != "Paid" }
+                        
                         ClientCard(
                             client = client,
                             planName = planName,
+                            hasUnpaid = hasUnpaid,
                             onClick = { onClientClick(client.id) }
                         )
                     }
@@ -184,17 +203,18 @@ fun ClientsScreen(
 }
 
 @Composable
-fun ClientCard(client: ClientEntity, planName: String, onClick: () -> Unit) {
+fun ClientCard(client: ClientEntity, planName: String, hasUnpaid: Boolean, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         onClick = onClick,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = if (hasUnpaid) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = if (hasUnpaid) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)) else null
     ) {
         Row(
             modifier = Modifier
@@ -206,16 +226,35 @@ fun ClientCard(client: ClientEntity, planName: String, onClick: () -> Unit) {
                 imageVector = Icons.Default.Person,
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = if (hasUnpaid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = client.name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = client.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = if (hasUnpaid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (hasUnpaid) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.error,
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.unpaid_badge),
+                                color = Color.White,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
                 Text(
                     text = stringResource(R.string.client_plan, planName),
                     style = MaterialTheme.typography.labelMedium,

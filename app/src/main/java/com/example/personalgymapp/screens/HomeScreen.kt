@@ -65,16 +65,19 @@ fun HomeScreen(
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
-                NavigationDrawerItem(
-                    label = { Text("Garmin") },
-                    selected = false,
-                    onClick = { 
-                        scope.launch { drawerState.close() }
-                        onGarminClick() 
-                    },
-                    icon = { Icon(Icons.Default.Watch, contentDescription = null) },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
+                // Hidden Garmin Menu Item
+                if (false) {
+                    NavigationDrawerItem(
+                        label = { Text("Garmin") },
+                        selected = false,
+                        onClick = { 
+                            scope.launch { drawerState.close() }
+                            onGarminClick() 
+                        },
+                        icon = { Icon(Icons.Default.Watch, contentDescription = null) },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                }
                 // Add more items if needed
             }
         }
@@ -176,25 +179,33 @@ fun HomeScreen(
                             modifier = Modifier.weight(1f),
                             onClick = onProgressClick
                         )
-                        MenuCard(
-                            title = stringResource(R.string.sensors),
-                            icon = Icons.Default.Sensors,
-                            modifier = Modifier.weight(1f),
-                            onClick = onSensorsClick
-                        )
+                        // Hidden Sensors
+                        if (false) {
+                            MenuCard(
+                                title = stringResource(R.string.sensors),
+                                icon = Icons.Default.Sensors,
+                                modifier = Modifier.weight(1f),
+                                onClick = onSensorsClick
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
                     }
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        MenuCard(
-                            title = stringResource(R.string.garmin),
-                            icon = Icons.Default.Watch,
-                            modifier = Modifier.weight(1f),
-                            onClick = onGarminClick
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
+                    // Hidden Garmin Row
+                    if (false) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            MenuCard(
+                                title = stringResource(R.string.garmin),
+                                icon = Icons.Default.Watch,
+                                modifier = Modifier.weight(1f),
+                                onClick = onGarminClick
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             }

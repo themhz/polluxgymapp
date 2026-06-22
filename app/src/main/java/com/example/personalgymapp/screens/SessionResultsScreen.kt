@@ -1,20 +1,34 @@
 package com.example.personalgymapp.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import com.example.personalgymapp.R
 import com.example.personalgymapp.components.AddActionFab
+import com.example.personalgymapp.components.FullScreenMapDialog
 import com.example.personalgymapp.model.*
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -30,6 +44,8 @@ fun SessionResultsScreen(
     onAddExerciseResultClick: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
+    var fullScreenMapPoints by remember { mutableStateOf<List<GPSPoint>?>(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -73,7 +89,7 @@ fun SessionResultsScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Header
+                // ... Header and Planned Workout ...
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -96,7 +112,6 @@ fun SessionResultsScreen(
                     }
                 }
 
-                // Planned Workout Section
                 item {
                     Text(
                         text = "Planned Workout",
@@ -164,7 +179,10 @@ fun SessionResultsScreen(
                     }
                 } else {
                     items(sessionExerciseResults) { result ->
-                        ExerciseResultCard(result = result)
+                        ExerciseResultCard(
+                            result = result,
+                            onMapClick = { fullScreenMapPoints = it }
+                        )
                     }
                 }
                 
@@ -173,10 +191,17 @@ fun SessionResultsScreen(
             }
         }
     }
+
+    if (fullScreenMapPoints != null) {
+        FullScreenMapDialog(
+            points = fullScreenMapPoints!!,
+            onDismiss = { fullScreenMapPoints = null }
+        )
+    }
 }
 
 @Composable
-fun ExerciseResultCard(result: SessionExerciseResult) {
+fun ExerciseResultCard(result: SessionExerciseResult, onMapClick: (List<GPSPoint>) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -234,16 +259,17 @@ fun ExerciseResultCard(result: SessionExerciseResult) {
             }
 
             if (result.gpsPath != null && result.gpsPath.isNotEmpty()) {
+                val path = result.gpsPath
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Tracked Route",
+                    text = "${stringResource(R.string.tracked_route)} (${stringResource(R.string.tap_to_enlarge)})",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 
-                val pathPoints = result.gpsPath.map { GeoPoint(it.latitude, it.longitude) }
+                val pathPoints = path.map { GeoPoint(it.latitude, it.longitude) }
                 
                 Box(
                     modifier = Modifier
@@ -255,9 +281,9 @@ fun ExerciseResultCard(result: SessionExerciseResult) {
                         factory = { context ->
                             MapView(context).apply {
                                 setTileSource(TileSourceFactory.MAPNIK)
-                                setMultiTouchControls(false) // Read-only view
+                                setMultiTouchControls(false)
                                 if (pathPoints.isNotEmpty()) {
-                                    controller.setZoom(15.0)
+                                    controller.setZoom(18.0)
                                     controller.setCenter(pathPoints.first())
                                     
                                     val polyline = Polyline(this)
@@ -268,10 +294,18 @@ fun ExerciseResultCard(result: SessionExerciseResult) {
                                 }
                             }
                         },
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        update = { it.invalidate() }
+                    )
+                    // Invisible overlay to catch clicks and prevent MapView from consuming them
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clickable { onMapClick(path) }
                     )
                 }
             }
         }
     }
 }
+

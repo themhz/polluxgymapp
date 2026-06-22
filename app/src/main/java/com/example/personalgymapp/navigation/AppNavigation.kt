@@ -13,15 +13,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.personalgymapp.screens.*
 import com.example.personalgymapp.viewmodel.ClientViewModel
 import com.example.personalgymapp.viewmodel.SettingsViewModel
 
 @Composable
-fun AppNavigation(clientViewModel: ClientViewModel) {
+fun AppNavigation(
+    clientViewModel: ClientViewModel,
+    settingsViewModel: SettingsViewModel
+) {
     val navController = rememberNavController()
-    val settingsViewModel: SettingsViewModel = viewModel()
     
     val clients by clientViewModel.clients.collectAsState()
     val exercises by clientViewModel.exercises.collectAsState()

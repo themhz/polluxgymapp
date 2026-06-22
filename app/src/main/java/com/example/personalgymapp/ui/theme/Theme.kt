@@ -40,6 +40,7 @@ fun PersonalGymAppTheme(
     darkTheme: Boolean = true, // Default to dark theme for gym look
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false, // Disable dynamic color to maintain the gym theme
+    primaryColor: Color = GymNeonCyan,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -48,8 +49,14 @@ fun PersonalGymAppTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> DarkColorScheme.copy(
+            primary = primaryColor,
+            secondary = primaryColor.copy(alpha = 0.8f) // Derive secondary from primary for harmony
+        )
+        else -> LightColorScheme.copy(
+            primary = primaryColor,
+            secondary = primaryColor.copy(alpha = 0.8f)
+        )
     }
 
     MaterialTheme(

@@ -19,9 +19,10 @@ import com.example.personalgymapp.model.*
         WorkoutPlan::class,
         TrainingSession::class,
         SessionExerciseResult::class,
-        SubscriptionPlanEntity::class
+        SubscriptionPlanEntity::class,
+        WorkoutPlanExerciseEntity::class
     ], 
-    version = 8,
+    version = 10,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
